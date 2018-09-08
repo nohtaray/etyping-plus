@@ -1,0 +1,17 @@
+{
+  "name": "etyping-better-result",
+  "version": "1.0.0",
+  "description": "e-typing のリザルト画面をいい感じにするやつ",
+  "manifest_version": 2,
+  "author": "やだ",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.e-typing.ne.jp/*"
+      ],
+      "js": [
+        "src/script.js"
+      ]
+    }
+  ]
+}
