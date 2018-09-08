@@ -67,7 +67,7 @@ setInterval(() => {
   const scriptId = '__etyping-better-result-script';
   if (!appIframe) return;
   // src は app/standard.asp だけど一度リダイレクトされる
-  if (appIframe.contentWindow.location.pathname !== '/app/jsa_std/typing.asp') return;
+  if (!appIframe.contentWindow.location.pathname.match(/\/app\/jsa_(std|kana)\/typing\.asp/g)) return;
   if (!appIframe.contentDocument.body) return;
   if (appIframe.contentDocument.getElementById(scriptId)) return;
 
