@@ -1,6 +1,9 @@
 const handleLoadApp = () => {
   console.log('etyping-better-result: enabled');
 
+  const ADD_ROWS = 1;
+  const ADD_HEIGHT = 32 * ADD_ROWS;
+
   const $ = jQuery;
   let latencies = [];
   let st;
@@ -33,6 +36,13 @@ const handleLoadApp = () => {
 
     latencies = [];
     previousResult = { latency, rkpm };
+
+    // 見た目調整
+    $('#result article').css('height', `+=${ADD_HEIGHT}px`);
+    $('#result #exampleList').css('height', `+=${ADD_HEIGHT}px`);
+    $('#result .result_data').css('height', `+=${ADD_HEIGHT}px`);
+    $('#result #current').css('height', `+=${ADD_HEIGHT}px`);
+    $('#result #prev').css('height', `+=${ADD_HEIGHT}px`);
   };
 
   let prevText;
@@ -63,6 +73,9 @@ const handleLoadApp = () => {
     childList: true,
     subtree: true,
   });
+
+  // 見た目調整
+  $('#app').css('height', `+=${ADD_HEIGHT}px`);
 };
 
 // タイピング画面出てたら script を注入する
@@ -80,4 +93,14 @@ setInterval(() => {
   script.id = scriptId;
   script.textContent = `( ${handleLoadApp.toString()} )()`;
   appIframe.contentDocument.body.appendChild(script);
+
+  // 見た目調整
+  const ADD_ROWS = 1;
+  const ADD_HEIGHT = 32 * ADD_ROWS;
+  const addHeight = (element, height) => {
+    element.style.height = parseInt(element.style.height, 10) + height + 'px';
+  };
+  addHeight(document.querySelector('.pp_content'), ADD_HEIGHT);
+  addHeight(document.querySelector('.pp_hoverContainer'), ADD_HEIGHT);
+  appIframe.height = parseInt(appIframe.height, 10) + ADD_HEIGHT;
 }, 1000);
