@@ -25,8 +25,8 @@ const handleLoadApp = () => {
     const timeStr = $('#current .result_data ul .title:contains("入力時間")').next().text();
     const time = timeStr.replace('秒', '.') * 1000;
     const charCount = +$('#current .result_data ul .title:contains("入力文字数")').next().text();
-    const wpm2 = (charCount - latencies.length) / (time - sum) * 60000;
-    $('#current .result_data ul').append(`<li id="wpm2"><div class="title">WPM2</div><div class="data">${wpm2.toFixed(2)}</div></li>`);
+    const rkpm = (charCount - latencies.length) / (time - sum) * 60000;
+    $('#current .result_data ul').append(`<li id="rkpm"><div class="title">RKPM</div><div class="data">${rkpm.toFixed(2)}</div></li>`);
 
     latencies = [];
   };
