@@ -1,7 +1,7 @@
 {
-  "name": "etyping-better-result",
-  "version": "1.0.0",
-  "description": "e-typing のリザルト画面をいい感じにするやつ",
+  "name": "e-typing のリザルトに初速を出すやつ",
+  "version": "1.1.0",
+  "description": "e-typing のリザルトに初速を出すやつ",
   "manifest_version": 2,
   "author": "やだ",
   "content_scripts": [
