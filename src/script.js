@@ -4,6 +4,7 @@ const handleLoadApp = () => {
   const $ = jQuery;
   let latencies = [];
   let st;
+  let previousResult = {};
   const handleShowWord = () => {
     st = Date.now();
   };
@@ -17,18 +18,21 @@ const handleLoadApp = () => {
     $('#prev .result_data ul li').last().remove();
 
     // 初速
-    const sum = latencies.map(a => +a).reduce((a, b) => a + b, 0);
-    const mean = sum / latencies.length / 1000;
-    $('#current .result_data ul').append(`<li id="latency"><div class="title">1文字目</div><div class="data">${mean.toFixed(3)}</div></li>`);
+    const latenciesSum = latencies.map(a => +a).reduce((a, b) => a + b, 0);
+    const latency = latenciesSum / latencies.length / 1000;
+    $('#current .result_data ul').append(`<li id="latency"><div class="title">1文字目</div><div class="data">${latency.toFixed(3)}</div></li>`);
+    $('#prev .result_data ul').append(`<li id="previous_latency"><div class="data">${previousResult.latency == null ? '-' : previousResult.latency.toFixed(3)}</div></li>`);
 
     // 1文字目除いた WPM
     const timeStr = $('#current .result_data ul .title:contains("入力時間")').next().text();
     const time = timeStr.replace('秒', '.') * 1000;
     const charCount = +$('#current .result_data ul .title:contains("入力文字数")').next().text();
-    const rkpm = (charCount - latencies.length) / (time - sum) * 60000;
+    const rkpm = (charCount - latencies.length) / (time - latenciesSum) * 60000;
     $('#current .result_data ul').append(`<li id="rkpm"><div class="title">RKPM</div><div class="data">${rkpm.toFixed(2)}</div></li>`);
+    $('#prev .result_data ul').append(`<li id="previous_rkpm"><div class="data">${previousResult.rkpm == null ? '-' : previousResult.rkpm.toFixed(2)}</div></li>`);
 
     latencies = [];
+    previousResult = { latency, rkpm };
   };
 
   let prevText;
