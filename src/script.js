@@ -79,6 +79,8 @@ const handleLoadApp = () => {
     $('#result .result_data').css('height', `+=${ADD_HEIGHT}px`);
     $('#result #current').css('height', `+=${ADD_HEIGHT}px`);
     $('#result #prev').css('height', `+=${ADD_HEIGHT}px`);
+    // マウスで選択できるようにする
+    $('#result').css({ 'user-select': 'text' });
   };
 
   const handleLoadStartView = () => {
