@@ -6,16 +6,49 @@ const handleLoadApp = () => {
 
   const $ = jQuery;
   let latencies = [];
-  let st;
+  let misses = [];
+  let times = [];
+  let finishedCount = 0;
+  let wordStartTime;
+  let wordMiss = 0;
   let previousResult = {};
   const handleShowWord = () => {
-    st = Date.now();
+    wordStartTime = Date.now();
+    wordMiss = 0;
+  };
+  const handleFinishWord = () => {
+    const wordTime = Date.now() - wordStartTime;
+    times.push(wordTime);
+    misses.push(wordMiss);
+    finishedCount += 1;
   };
   const handleAcceptFirstKey = () => {
-    const lt = Date.now() - st;
-    latencies.push(lt);
+    const latency = Date.now() - wordStartTime;
+    latencies.push(latency);
+  };
+  const handleAccept = () => {
+  };
+  const handleMiss = () => {
+    wordMiss += 1;
+  };
+  const handleEscape = () => {
+    const time = Date.now() - wordStartTime;
+    times.push(time);
+    misses.push(wordMiss);
   };
   const handleShowResult = () => {
+    // ワード詳細
+    for (let i = 0; i < finishedCount; i++) {
+      const wordLength = $('#exampleList li .sentence').eq(i).text().trim().length;
+      const kpm = wordLength / times[i] * 60000;
+      const rkpm = (wordLength - 1) / (times[i] - latencies[i]) * 60000;
+      $('#exampleList li').eq(i).append($('<div>').css({
+        'font-size': '12px',
+        'position': 'relative',
+        'top': '-2px',
+      }).text(`latency: ${(latencies[i] / 1000).toFixed(3)}, kpm: ${kpm.toFixed(0)}, rkpm: ${rkpm.toFixed(0)}, miss: ${misses[i].toFixed(0)}`));
+    }
+
     // 苦手キー邪魔なので除去
     $('#current .result_data ul li').last().remove();
     $('#prev .result_data ul li').last().remove();
@@ -34,7 +67,10 @@ const handleLoadApp = () => {
     $('#current .result_data ul').append(`<li id="rkpm"><div class="title">RKPM</div><div class="data">${rkpm.toFixed(2)}</div></li>`);
     $('#prev .result_data ul').append(`<li id="previous_rkpm"><div class="data">${previousResult.rkpm == null ? '-' : previousResult.rkpm.toFixed(2)}</div></li>`);
 
+    misses = [];
+    times = [];
     latencies = [];
+    finishedCount = 0;
     previousResult = { latency, rkpm };
 
     // 見た目調整
@@ -45,20 +81,40 @@ const handleLoadApp = () => {
     $('#result #prev').css('height', `+=${ADD_HEIGHT}px`);
   };
 
-  let prevText;
-  let prevEntered;
-  const handleChangeNode = () => {
-    const text = $('#sentenceText').text().trim();
-    const entered = $('#sentenceText .entered').text().trim();
-    if (text !== '' && prevText === '') {
-      // ワード出現
+  const handleLoadStartView = () => {
+    // タイピング終了時に毎回削除されるので毎回設定する
+    // これらのイベント発火時にはまだ画面書き換わってないので気をつける
+    let waitingAcceptedFirstKey = false;
+    $(document).on('end_countdown.etyping change_complete.etyping', () => {
       handleShowWord();
-    } else if (prevEntered === '' && entered !== '') {
-      // 1文字目打った
-      handleAcceptFirstKey();
+      waitingAcceptedFirstKey = true;
+    });
+    $(document).on('correct.etyping', () => {
+      if (waitingAcceptedFirstKey) {
+        handleAcceptFirstKey();
+        waitingAcceptedFirstKey = false;
+      }
+      handleAccept();
+    });
+    $(document).on('error.etyping', () => {
+      handleMiss();
+    });
+    $(document).on('change_example.etyping complete.etyping', () => {
+      handleAccept();
+      handleFinishWord();
+    });
+    $(document).on('interrupt.etyping', () => {
+      handleEscape();
+    });
+  };
+
+  let startViewIsShowed = false;
+  // イベントハンドラで画面書き換えた後にミスって例外吐くと無限ループになるのであんまりここに処理書きたくない
+  const handleChangeNode = () => {
+    if ($('#start_msg').size() + $('#countdown').size() > 0 && !startViewIsShowed) {
+      handleLoadStartView();
     }
-    prevText = text;
-    prevEntered = entered;
+    startViewIsShowed = $('#start_msg').size() + $('#countdown').size() > 0;
 
     // リザルト出た
     if ($('#current .result_data').size() > 0 && $('#latency').size() === 0) {
