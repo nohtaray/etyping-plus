@@ -109,17 +109,21 @@ const handleLoadApp = () => {
   };
 
   let startViewIsShowed = false;
-  // イベントハンドラで画面書き換えた後にミスって例外吐くと無限ループになるのであんまりここに処理書きたくない
+  let resultViewIsShowed = false;
+  // イベントハンドラで画面書き換えた後にミスって例外吐くと無限ループになりかねないのであんまりここに処理書きたくない
   const handleChangeNode = () => {
     if ($('#start_msg').size() + $('#countdown').size() > 0 && !startViewIsShowed) {
+      startViewIsShowed = true;
       handleLoadStartView();
     }
     startViewIsShowed = $('#start_msg').size() + $('#countdown').size() > 0;
 
     // リザルト出た
-    if ($('#current .result_data').size() > 0 && $('#latency').size() === 0) {
+    if ($('#current .result_data').size() > 0 && !resultViewIsShowed) {
+      resultViewIsShowed = true;
       handleShowResult();
     }
+    resultViewIsShowed = $('#current .result_data').size() > 0;
   };
 
   const observer = new MutationObserver((...args) => {
