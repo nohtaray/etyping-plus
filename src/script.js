@@ -48,8 +48,8 @@ const handleLoadApp = () => {
   let prevText;
   let prevEntered;
   const handleChangeNode = () => {
-    const text = $('#exampleText').text();
-    const entered = $('#sentenceText .entered').text();
+    const text = $('#sentenceText').text().trim();
+    const entered = $('#sentenceText .entered').text().trim();
     if (text !== '' && prevText === '') {
       // ワード出現
       handleShowWord();
