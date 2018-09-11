@@ -56,7 +56,7 @@ const handleLoadApp = () => {
     // 初速
     const latenciesSum = latencies.map(a => +a).reduce((a, b) => a + b, 0);
     const latency = latenciesSum / latencies.length / 1000;
-    $('#current .result_data ul').append(`<li id="latency"><div class="title">1文字目</div><div class="data">${latency.toFixed(3)}</div></li>`);
+    $('#current .result_data ul').append(`<li id="latency"><div class="title">Latency</div><div class="data">${latency.toFixed(3)}</div></li>`);
     $('#prev .result_data ul').append(`<li id="previous_latency"><div class="data">${previousResult.latency == null ? '-' : previousResult.latency.toFixed(3)}</div></li>`);
 
     // 1文字目除いた WPM
