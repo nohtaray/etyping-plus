@@ -1,5 +1,5 @@
 const handleLoadApp = () => {
-  console.log('etyping-better-result: enabled');
+  console.log('٩( ๑╹ ꇴ╹)۶');
 
   const ADD_ROWS = 1;
   const ADD_HEIGHT = 32 * ADD_ROWS;
