@@ -38,6 +38,17 @@ const handleLoadApp = () => {
     lengths.push(incompleteWord.length);
   };
   const handleShowResult = () => {
+    // ワード詳細
+    for (let i = 0; i < latencies.length; i++) {
+      const kpm = lengths[i] / times[i] * 60000;
+      const rkpm = (lengths[i] - 1) / (times[i] - latencies[i]) * 60000;
+      $('#exampleList li').eq(i).append($('<div>').css({
+        'font-size': '12px',
+        'position': 'relative',
+        'top': '-2px',
+      }).text(`latency: ${(latencies[i] / 1000).toFixed(3)}, kpm: ${kpm.toFixed(0)}, rkpm: ${rkpm.toFixed(0)}, miss: ${misses[i].toFixed(0)}`));
+    }
+
     // 苦手キー邪魔なので除去
     $('#current .result_data ul li').last().remove();
     $('#prev .result_data ul li').last().remove();
@@ -56,8 +67,6 @@ const handleLoadApp = () => {
     $('#current .result_data ul').append(`<li id="rkpm"><div class="title">RKPM</div><div class="data">${rkpm.toFixed(2)}</div></li>`);
     $('#prev .result_data ul').append(`<li id="previous_rkpm"><div class="data">${previousResult.rkpm == null ? '-' : previousResult.rkpm.toFixed(2)}</div></li>`);
 
-    console.log({ misses, times, lengths, latencies });
-    console.log(times.reduce((a, b) => a + b, 0));
     misses = [];
     times = [];
     lengths = [];
