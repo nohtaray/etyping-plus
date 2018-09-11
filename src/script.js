@@ -83,10 +83,17 @@ const handleLoadApp = () => {
 
   const handleLoadStartView = () => {
     // タイピング終了時に毎回削除されるので毎回設定する
+    // これらのイベント発火時にはまだ画面書き換わってないので気をつける
+    let waitingAcceptedFirstKey = false;
     $(document).on('end_countdown.etyping change_complete.etyping', () => {
       handleShowWord();
+      waitingAcceptedFirstKey = true;
     });
     $(document).on('correct.etyping', () => {
+      if (waitingAcceptedFirstKey) {
+        handleAcceptFirstKey();
+        waitingAcceptedFirstKey = false;
+      }
       handleAccept();
     });
     $(document).on('error.etyping', () => {
@@ -102,23 +109,12 @@ const handleLoadApp = () => {
   };
 
   let startViewIsShowed = false;
-  let prevText;
-  let prevEntered;
+  // イベントハンドラで画面書き換えた後にミスって例外吐くと無限ループになるのであんまりここに処理書きたくない
   const handleChangeNode = () => {
     if ($('#start_msg').size() + $('#countdown').size() > 0 && !startViewIsShowed) {
       handleLoadStartView();
     }
     startViewIsShowed = $('#start_msg').size() + $('#countdown').size() > 0;
-
-    const text = $('#sentenceText').text().trim();
-    const entered = $('#sentenceText .entered').text().trim();
-    if (prevEntered === '' && entered !== '') {
-      // TODO: ここだと少しずれるので `xx.etyping` イベントのほうに移す
-      // 1文字目打った
-      handleAcceptFirstKey();
-    }
-    prevText = text;
-    prevEntered = entered;
 
     // リザルト出た
     if ($('#current .result_data').size() > 0 && $('#latency').size() === 0) {
