@@ -6,14 +6,36 @@ const handleLoadApp = () => {
 
   const $ = jQuery;
   let latencies = [];
-  let st;
+  let misses = [];
+  let times = [];
+  let lengths = [];
+  let wordStartTime;
+  let wordMiss = 0;
   let previousResult = {};
   const handleShowWord = () => {
-    st = Date.now();
+    wordStartTime = Date.now();
+    wordMiss = 0;
+  };
+  const handleFinishWord = (word) => {
+    const wordTime = Date.now() - wordStartTime;
+    times.push(wordTime);
+    misses.push(wordMiss);
+    lengths.push(word.length);
   };
   const handleAcceptFirstKey = () => {
-    const lt = Date.now() - st;
-    latencies.push(lt);
+    const latency = Date.now() - wordStartTime;
+    latencies.push(latency);
+  };
+  const handleAccept = () => {
+  };
+  const handleMiss = () => {
+    wordMiss += 1;
+  };
+  const handleEscape = (incompleteWord) => {
+    const time = Date.now() - wordStartTime;
+    times.push(time);
+    misses.push(wordMiss);
+    lengths.push(incompleteWord.length);
   };
   const handleShowResult = () => {
     // 苦手キー邪魔なので除去
@@ -34,6 +56,11 @@ const handleLoadApp = () => {
     $('#current .result_data ul').append(`<li id="rkpm"><div class="title">RKPM</div><div class="data">${rkpm.toFixed(2)}</div></li>`);
     $('#prev .result_data ul').append(`<li id="previous_rkpm"><div class="data">${previousResult.rkpm == null ? '-' : previousResult.rkpm.toFixed(2)}</div></li>`);
 
+    console.log({ misses, times, lengths, latencies });
+    console.log(times.reduce((a, b) => a + b, 0));
+    misses = [];
+    times = [];
+    lengths = [];
     latencies = [];
     previousResult = { latency, rkpm };
 
@@ -45,15 +72,40 @@ const handleLoadApp = () => {
     $('#result #prev').css('height', `+=${ADD_HEIGHT}px`);
   };
 
+  const handleLoadStartView = () => {
+    // タイピング終了時に毎回削除されるので毎回設定する
+    $(document).on('end_countdown.etyping change_complete.etyping', () => {
+      handleShowWord();
+    });
+    $(document).on('correct.etyping change_example.etyping complete.etyping', () => {
+      handleAccept();
+    });
+    $(document).on('error.etyping', () => {
+      handleMiss();
+    });
+    $(document).on('change_example.etyping complete.etyping', () => {
+      const word = $('#sentenceText').text().trim();
+      handleFinishWord(word);
+    });
+    $(document).on('interrupt.etyping', () => {
+      const word = $('#sentenceText .entered').text().trim();
+      handleEscape(word);
+    });
+  };
+
+  let startViewIsShowed = false;
   let prevText;
   let prevEntered;
   const handleChangeNode = () => {
+    if ($('#start_msg').size() > 0 && !startViewIsShowed) {
+      handleLoadStartView();
+    }
+    startViewIsShowed = $('#start_msg').size() > 0;
+
     const text = $('#sentenceText').text().trim();
     const entered = $('#sentenceText .entered').text().trim();
-    if (text !== '' && prevText === '') {
-      // ワード出現
-      handleShowWord();
-    } else if (prevEntered === '' && entered !== '') {
+    if (prevEntered === '' && entered !== '') {
+      // TODO: ここだと少しずれるので `xx.etyping` イベントのほうに移す
       // 1文字目打った
       handleAcceptFirstKey();
     }
