@@ -97,10 +97,10 @@ const handleLoadApp = () => {
   let prevText;
   let prevEntered;
   const handleChangeNode = () => {
-    if ($('#start_msg').size() > 0 && !startViewIsShowed) {
+    if ($('#start_msg').size() + $('#countdown').size() > 0 && !startViewIsShowed) {
       handleLoadStartView();
     }
-    startViewIsShowed = $('#start_msg').size() > 0;
+    startViewIsShowed = $('#start_msg').size() + $('#countdown').size() > 0;
 
     const text = $('#sentenceText').text().trim();
     const entered = $('#sentenceText .entered').text().trim();
