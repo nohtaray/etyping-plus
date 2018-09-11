@@ -8,7 +8,7 @@ const handleLoadApp = () => {
   let latencies = [];
   let misses = [];
   let times = [];
-  let lengths = [];
+  let finishedCount = 0;
   let wordStartTime;
   let wordMiss = 0;
   let previousResult = {};
@@ -16,11 +16,11 @@ const handleLoadApp = () => {
     wordStartTime = Date.now();
     wordMiss = 0;
   };
-  const handleFinishWord = (word) => {
+  const handleFinishWord = () => {
     const wordTime = Date.now() - wordStartTime;
     times.push(wordTime);
     misses.push(wordMiss);
-    lengths.push(word.length);
+    finishedCount += 1;
   };
   const handleAcceptFirstKey = () => {
     const latency = Date.now() - wordStartTime;
@@ -31,17 +31,17 @@ const handleLoadApp = () => {
   const handleMiss = () => {
     wordMiss += 1;
   };
-  const handleEscape = (incompleteWord) => {
+  const handleEscape = () => {
     const time = Date.now() - wordStartTime;
     times.push(time);
     misses.push(wordMiss);
-    lengths.push(incompleteWord.length);
   };
   const handleShowResult = () => {
     // ワード詳細
-    for (let i = 0; i < latencies.length; i++) {
-      const kpm = lengths[i] / times[i] * 60000;
-      const rkpm = (lengths[i] - 1) / (times[i] - latencies[i]) * 60000;
+    for (let i = 0; i < finishedCount; i++) {
+      const wordLength = $('#exampleList li .sentence').eq(i).text().trim().length;
+      const kpm = wordLength / times[i] * 60000;
+      const rkpm = (wordLength - 1) / (times[i] - latencies[i]) * 60000;
       $('#exampleList li').eq(i).append($('<div>').css({
         'font-size': '12px',
         'position': 'relative',
@@ -69,8 +69,8 @@ const handleLoadApp = () => {
 
     misses = [];
     times = [];
-    lengths = [];
     latencies = [];
+    finishedCount = 0;
     previousResult = { latency, rkpm };
 
     // 見た目調整
@@ -82,27 +82,22 @@ const handleLoadApp = () => {
   };
 
   const handleLoadStartView = () => {
-    let word = '';
-
     // タイピング終了時に毎回削除されるので毎回設定する
     $(document).on('end_countdown.etyping change_complete.etyping', () => {
       handleShowWord();
     });
     $(document).on('correct.etyping', () => {
       handleAccept();
-      // `complete.etyping` のときだけワードが取れないので打鍵時にとっておく
-      word = $('#sentenceText').text().trim();
     });
     $(document).on('error.etyping', () => {
       handleMiss();
     });
     $(document).on('change_example.etyping complete.etyping', () => {
       handleAccept();
-      handleFinishWord(word);
+      handleFinishWord();
     });
     $(document).on('interrupt.etyping', () => {
-      const word = $('#sentenceText .entered').text().trim();
-      handleEscape(word);
+      handleEscape();
     });
   };
 
