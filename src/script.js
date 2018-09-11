@@ -82,18 +82,22 @@ const handleLoadApp = () => {
   };
 
   const handleLoadStartView = () => {
+    let word = '';
+
     // タイピング終了時に毎回削除されるので毎回設定する
     $(document).on('end_countdown.etyping change_complete.etyping', () => {
       handleShowWord();
     });
-    $(document).on('correct.etyping change_example.etyping complete.etyping', () => {
+    $(document).on('correct.etyping', () => {
       handleAccept();
+      // `complete.etyping` のときだけワードが取れないので打鍵時にとっておく
+      word = $('#sentenceText').text().trim();
     });
     $(document).on('error.etyping', () => {
       handleMiss();
     });
     $(document).on('change_example.etyping complete.etyping', () => {
-      const word = $('#sentenceText').text().trim();
+      handleAccept();
       handleFinishWord(word);
     });
     $(document).on('interrupt.etyping', () => {
