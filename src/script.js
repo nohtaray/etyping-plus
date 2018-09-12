@@ -37,6 +37,8 @@ const handleLoadApp = () => {
     misses.push(wordMiss);
   };
   const handleShowResult = () => {
+    console.log({ misses, times, latencies, finishedCount });
+
     // ワード詳細
     for (let i = 0; i < finishedCount; i++) {
       const wordLength = $('#exampleList li .sentence').eq(i).text().trim().length;
