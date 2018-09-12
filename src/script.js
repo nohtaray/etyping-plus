@@ -93,7 +93,7 @@ const handleLoadApp = () => {
       handleShowWord();
       waitingAcceptedFirstKey = true;
     });
-    $(document).on('correct.etyping', () => {
+    $(document).on('correct.etyping change_example.etyping complete.etyping', () => {
       if (waitingAcceptedFirstKey) {
         handleAcceptFirstKey();
         waitingAcceptedFirstKey = false;
@@ -104,7 +104,6 @@ const handleLoadApp = () => {
       handleMiss();
     });
     $(document).on('change_example.etyping complete.etyping', () => {
-      handleAccept();
       handleFinishWord();
     });
     $(document).on('interrupt.etyping', () => {
