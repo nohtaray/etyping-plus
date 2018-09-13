@@ -31,10 +31,24 @@ const handleLoadApp = () => {
     times.push(wordTime);
     misses.push(wordMiss);
     finishedCount += 1;
+
+    $('.balloon').remove();
   };
   const handleAcceptFirstKey = () => {
     const latency = Date.now() - wordStartTime;
     latencies.push(latency);
+
+    const color = latency < 500 ? '#dff0d8' : latency < 600 ? '#fcf8e3' : '#f2dede';
+    $('#sentenceText .entered').showBalloon({
+      contents: (latency / 1000).toFixed(3), classname: 'balloon', position: 'bottom right', offsetY: -30, offsetX: 0, showDuration: 64,
+      showAnimation: function(d, c) { this.fadeIn(d, c); },
+      css: {
+        backgroundColor: color,
+        color: '#636363',
+        boxShadow: '1px 1px 1px #555',
+        textAlign: 'right',
+      },
+    });
   };
   const handleAccept = () => {
   };
@@ -45,6 +59,8 @@ const handleLoadApp = () => {
     const time = Date.now() - wordStartTime;
     times.push(time);
     misses.push(wordMiss);
+
+    $('.balloon').remove();
   };
   const handleShowResult = () => {
     console.log({ misses, times, latencies, finishedCount });
@@ -161,11 +177,17 @@ setInterval(() => {
   if (!appIframe.contentDocument.body) return;
   if (appIframe.contentDocument.getElementById(scriptId)) return;
 
+  // TODO: 整理する。外部ファイルにしたい
   const script = document.createElement('script');
   script.type = 'text/javascript';
   script.id = scriptId;
   script.textContent = `( ${handleLoadApp.toString()} )()`;
   appIframe.contentDocument.body.appendChild(script);
+
+  const script2 = document.createElement('script');
+  script2.type = 'text/javascript';
+  script2.src = chrome.runtime.getURL('src/jquery.balloon.min.js');
+  appIframe.contentDocument.body.appendChild(script2);
 
   // 見た目調整
   const ADD_ROWS = 1;
