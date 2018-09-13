@@ -4,6 +4,16 @@ const handleLoadApp = () => {
   const ADD_ROWS = 1;
   const ADD_HEIGHT = 32 * ADD_ROWS;
 
+  const killException = function(f) {
+    return function(...args) {
+      try {
+        return f.call(this, ...args);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+  };
+
   const $ = jQuery;
   let latencies = [];
   let misses = [];
@@ -87,28 +97,28 @@ const handleLoadApp = () => {
 
   const handleLoadStartView = () => {
     // タイピング終了時に毎回削除されるので毎回設定する
-    // これらのイベント発火時にはまだ画面書き換わってないので気をつける
+    // jQuery#on で設定した関数内で例外が発生すると後続の関数も実行されなくなるので例外は潰す
     let waitingAcceptedFirstKey = false;
-    $(document).on('end_countdown.etyping change_complete.etyping', () => {
+    $(document).on('end_countdown.etyping change_complete.etyping', killException(() => {
       handleShowWord();
       waitingAcceptedFirstKey = true;
-    });
-    $(document).on('correct.etyping change_example.etyping complete.etyping', () => {
+    }));
+    $(document).on('correct.etyping change_example.etyping complete.etyping', killException(() => {
       if (waitingAcceptedFirstKey) {
         handleAcceptFirstKey();
         waitingAcceptedFirstKey = false;
       }
       handleAccept();
-    });
-    $(document).on('error.etyping', () => {
+    }));
+    $(document).on('error.etyping', killException(() => {
       handleMiss();
-    });
-    $(document).on('change_example.etyping complete.etyping', () => {
+    }));
+    $(document).on('change_example.etyping complete.etyping', killException(() => {
       handleFinishWord();
-    });
-    $(document).on('interrupt.etyping', () => {
+    }));
+    $(document).on('interrupt.etyping', killException(() => {
       handleEscape();
-    });
+    }));
   };
 
   let startViewIsShowed = false;
