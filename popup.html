@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <style>
+        /* 矢印消す */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            text-align: right;
+        }
+    </style>
+    <script type="text/javascript" src="src/popup.js"></script>
+</head>
+<body style="width:auto;">
+<h3>初速設定（Beta）</h3>
+<div style="white-space: nowrap">
+    <input type="checkbox" id="show-latency-balloon">
+    <label for="show-latency-balloon">初速表示（ランキング登録不可）</label>
+</div>
+<div style="white-space: nowrap">
+    <label for="latency-target1" style="display: inline-block; width: 40px">目標1:</label>
+    <input type="number" min="0" step="1" value="50" id="latency-target1" style="width: 30px">ms
+</div>
+<div style="white-space: nowrap">
+    <label for="latency-target2" style="display: inline-block; width: 40px">目標2:</label>
+    <input type="number" min="0" step="1" value="50" id="latency-target2" style="width: 30px">ms
+</div>
+</body>
+</html>
