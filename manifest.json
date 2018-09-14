@@ -4,6 +4,9 @@
   "description": "e-typing のリザルトをいい感じにするやつ",
   "manifest_version": 2,
   "author": "やだ",
+  "background": {
+    "scripts": ["src/background.js"]
+  },
   "content_scripts": [
     {
       "matches": [

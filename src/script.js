@@ -15,6 +15,9 @@ const handleLoadApp = () => {
   };
 
   const $ = jQuery;
+  let showLatencyBalloon;
+  let latencyTarget1;
+  let latencyTarget2;
   let latencies = [];
   let misses = [];
   let times = [];
@@ -38,7 +41,8 @@ const handleLoadApp = () => {
     const latency = Date.now() - wordStartTime;
     latencies.push(latency);
 
-    const color = latency < 500 ? '#dff0d8' : latency < 600 ? '#fcf8e3' : '#f2dede';
+    if (!showLatencyBalloon) return;
+    const color = latency < latencyTarget1 ? '#dff0d8' : latency < latencyTarget2 ? '#fcf8e3' : '#f2dede';
     $('#sentenceText .entered').showBalloon({
       contents: (latency / 1000).toFixed(3), classname: 'balloon', position: 'bottom right', offsetY: -30, offsetX: 0, showDuration: 64,
       showAnimation: function(d, c) { this.fadeIn(d, c); },
@@ -112,6 +116,10 @@ const handleLoadApp = () => {
   };
 
   const handleLoadStartView = () => {
+    showLatencyBalloon = !!$('#config').data('showLatencyBalloon');
+    latencyTarget1 = parseInt($('#config').data('latencyTarget1'), 10);
+    latencyTarget2 = parseInt($('#config').data('latencyTarget2'), 10);
+
     // タイピング終了時に毎回削除されるので毎回設定する
     // jQuery#on で設定した関数内で例外が発生すると後続の関数も実行されなくなるので例外は潰す
     let waitingAcceptedFirstKey = false;
@@ -167,6 +175,13 @@ const handleLoadApp = () => {
   $('#app').css('height', `+=${ADD_HEIGHT}px`);
 };
 
+const getConfig = callback => {
+  // -> background.js
+  chrome.runtime.sendMessage(['localStorage', 'getAllItems'], items => {
+    callback.call(null, items);
+  });
+};
+
 // タイピング画面出てたら script を注入する
 setInterval(() => {
   const appIframe = document.querySelector('iframe[src*="app/standard.asp"]');
@@ -188,6 +203,16 @@ setInterval(() => {
   script2.type = 'text/javascript';
   script2.src = chrome.runtime.getURL('src/jquery.balloon.min.js');
   appIframe.contentDocument.body.appendChild(script2);
+
+  const configDiv = document.createElement('div');
+  configDiv.id = 'config';
+  configDiv.style.display = 'none';
+  appIframe.contentDocument.body.appendChild(configDiv);
+  getConfig(config => {
+    configDiv.dataset.showLatencyBalloon = config['config.showLatencyBalloon'];
+    configDiv.dataset.latencyTarget1 = config['config.latencyTarget1'];
+    configDiv.dataset.latencyTarget2 = config['config.latencyTarget2'];
+  });
 
   // 見た目調整
   const ADD_ROWS = 1;
