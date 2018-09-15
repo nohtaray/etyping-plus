@@ -3,6 +3,18 @@ const handleLoadApp = () => {
 
   const ADD_ROWS = 1;
   const ADD_HEIGHT = 32 * ADD_ROWS;
+  const $ = jQuery;
+
+  {
+    // 打鍵直後の初速表示が有効なときはランキング送信を失敗させる
+    const $originalAjax = $.ajax;
+    $.ajax = (options, ...args) => {
+      if (shouldShowLatencyBalloon && typeof options.url === 'string' && options.url.endsWith('set_ranking.asp')) {
+        return $.Deferred().reject().promise();
+      }
+      return $originalAjax(options, ...args)
+    };
+  }
 
   const showLatencyBalloon = (latency, target1, target2) => {
     const color = latency < target1 ? '#dff0d8' : latency < target2 ? '#fcf8e3' : '#f2dede';
@@ -31,7 +43,6 @@ const handleLoadApp = () => {
     };
   };
 
-  const $ = jQuery;
   let shouldShowLatencyBalloon;
   let latencyTarget1;
   let latencyTarget2;
