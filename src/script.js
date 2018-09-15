@@ -4,6 +4,23 @@ const handleLoadApp = () => {
   const ADD_ROWS = 1;
   const ADD_HEIGHT = 32 * ADD_ROWS;
 
+  const showLatencyBalloon = (latency, target1, target2) => {
+    const color = latency < target1 ? '#dff0d8' : latency < target2 ? '#fcf8e3' : '#f2dede';
+    $('#sentenceText .entered').showBalloon({
+      contents: (latency / 1000).toFixed(3), classname: 'balloon', position: 'bottom right', offsetY: -30, offsetX: 0, showDuration: 64,
+      showAnimation: function(d, c) { this.fadeIn(d, c); },
+      css: {
+        backgroundColor: color,
+        color: '#636363',
+        boxShadow: '1px 1px 1px #555',
+        textAlign: 'right',
+      },
+    });
+  };
+  const hideLatencyBalloon = () => {
+    $('.balloon').remove();
+  };
+
   const killException = function(f) {
     return function(...args) {
       try {
@@ -15,7 +32,7 @@ const handleLoadApp = () => {
   };
 
   const $ = jQuery;
-  let showLatencyBalloon;
+  let shouldShowLatencyBalloon;
   let latencyTarget1;
   let latencyTarget2;
   let latencies = [];
@@ -35,24 +52,16 @@ const handleLoadApp = () => {
     misses.push(wordMiss);
     finishedCount += 1;
 
-    $('.balloon').remove();
+    hideLatencyBalloon();
   };
+
   const handleAcceptFirstKey = () => {
     const latency = Date.now() - wordStartTime;
     latencies.push(latency);
 
-    if (!showLatencyBalloon) return;
-    const color = latency < latencyTarget1 ? '#dff0d8' : latency < latencyTarget2 ? '#fcf8e3' : '#f2dede';
-    $('#sentenceText .entered').showBalloon({
-      contents: (latency / 1000).toFixed(3), classname: 'balloon', position: 'bottom right', offsetY: -30, offsetX: 0, showDuration: 64,
-      showAnimation: function(d, c) { this.fadeIn(d, c); },
-      css: {
-        backgroundColor: color,
-        color: '#636363',
-        boxShadow: '1px 1px 1px #555',
-        textAlign: 'right',
-      },
-    });
+    if (shouldShowLatencyBalloon) {
+      showLatencyBalloon(latency, latencyTarget1, latencyTarget2);
+    }
   };
   const handleAccept = () => {
   };
@@ -64,7 +73,7 @@ const handleLoadApp = () => {
     times.push(time);
     misses.push(wordMiss);
 
-    $('.balloon').remove();
+    hideLatencyBalloon();
   };
   const handleShowResult = () => {
     console.log({ misses, times, latencies, finishedCount });
@@ -116,7 +125,7 @@ const handleLoadApp = () => {
   };
 
   const handleLoadStartView = () => {
-    showLatencyBalloon = !!$('#config').data('showLatencyBalloon');
+    shouldShowLatencyBalloon = !!$('#config').data('showLatencyBalloon');
     latencyTarget1 = parseInt($('#config').data('latencyTarget1'), 10);
     latencyTarget2 = parseInt($('#config').data('latencyTarget2'), 10);
 
