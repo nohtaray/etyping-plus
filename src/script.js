@@ -206,11 +206,13 @@ setInterval(() => {
   script.type = 'text/javascript';
   script.id = scriptId;
   script.textContent = `( ${handleLoadApp.toString()} )()`;
+  script.defer = true;
   appIframe.contentDocument.body.appendChild(script);
 
   const script2 = document.createElement('script');
   script2.type = 'text/javascript';
   script2.src = chrome.runtime.getURL('src/jquery.balloon.min.js');
+  script2.async = true;
   appIframe.contentDocument.body.appendChild(script2);
 
   const configDiv = document.createElement('div');
