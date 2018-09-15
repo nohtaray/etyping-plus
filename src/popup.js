@@ -23,11 +23,11 @@ window.onload = () => {
     q('#latency-target2').disabled = !this.checked;
     sendConfigToActiveTab();
   }, false);
-  q('#latency-target1').addEventListener('change', function() {
+  q('#latency-target1').addEventListener('keyup', function() {
     localStorage.setItem(CONFIG_LATENCY_TARGET_1, this.value);
     sendConfigToActiveTab();
   }, false);
-  q('#latency-target2').addEventListener('change', function() {
+  q('#latency-target2').addEventListener('keyup', function() {
     localStorage.setItem(CONFIG_LATENCY_TARGET_2, this.value);
     sendConfigToActiveTab();
   }, false);
