@@ -12,20 +12,19 @@ const handleLoadApp = () => {
       if (shouldShowLatencyBalloon && typeof options.url === 'string' && options.url.endsWith('set_ranking.asp')) {
         return $.Deferred().reject().promise();
       }
-      return $originalAjax(options, ...args)
+      return $originalAjax(options, ...args);
     };
   }
 
   const showLatencyBalloon = (latency, target1, target2) => {
     const color = latency < target1 ? '#dff0d8' : latency < target2 ? '#fcf8e3' : '#f2dede';
-    $('#sentenceText .entered').showBalloon({
-      contents: (latency / 1000).toFixed(3), classname: 'balloon', position: 'bottom right', offsetY: -30, offsetX: 0, showDuration: 64,
+    $('#sentenceText .entered').next().showBalloon({
+      contents: (latency / 1000).toFixed(3), classname: 'balloon', position: 'bottom left', offsetY: -4, offsetX: 50, tipSize: 0, showDuration: 64,
       showAnimation: function(d, c) { this.fadeIn(d, c); },
       css: {
         backgroundColor: color,
         color: '#636363',
         boxShadow: '1px 1px 1px #555',
-        textAlign: 'right',
       },
     });
   };
