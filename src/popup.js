@@ -11,9 +11,14 @@ window.onload = () => {
     });
   };
 
+  // デフォルト値設定
+  if (localStorage.getItem(CONFIG_SHOW_LATENCY_BALLOON) == null) localStorage.setItem(CONFIG_SHOW_LATENCY_BALLOON, '');
+  if (localStorage.getItem(CONFIG_LATENCY_TARGET_1) == null) localStorage.setItem(CONFIG_LATENCY_TARGET_1, '0.400');
+  if (localStorage.getItem(CONFIG_LATENCY_TARGET_2) == null) localStorage.setItem(CONFIG_LATENCY_TARGET_2, '0.500');
+
   q('#show-latency-balloon').checked = !!localStorage.getItem(CONFIG_SHOW_LATENCY_BALLOON);
-  q('#latency-target1').value = localStorage.getItem(CONFIG_LATENCY_TARGET_1) || '0.400';
-  q('#latency-target2').value = localStorage.getItem(CONFIG_LATENCY_TARGET_2) || '0.500';
+  q('#latency-target1').value = localStorage.getItem(CONFIG_LATENCY_TARGET_1);
+  q('#latency-target2').value = localStorage.getItem(CONFIG_LATENCY_TARGET_2);
   q('#latency-target1').disabled = !q('#show-latency-balloon').checked;
   q('#latency-target2').disabled = !q('#show-latency-balloon').checked;
 

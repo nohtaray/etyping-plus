@@ -17,9 +17,9 @@ const getAppIframe = () => {
 };
 
 const updateConfigDiv = (configDiv, config) => {
-  configDiv.dataset.showLatencyBalloon = config['config.showLatencyBalloon'];
-  configDiv.dataset.latencyTarget1 = config['config.latencyTarget1'];
-  configDiv.dataset.latencyTarget2 = config['config.latencyTarget2'];
+  configDiv.dataset.showLatencyBalloon = config['config.showLatencyBalloon'] || '';
+  configDiv.dataset.latencyTarget1 = config['config.latencyTarget1'] || 0;
+  configDiv.dataset.latencyTarget2 = config['config.latencyTarget2'] || 0;
 };
 
 // タイピング画面出てたら script を注入する
