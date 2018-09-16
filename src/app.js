@@ -169,14 +169,14 @@ jQuery(function($) {
   let resultViewIsShowed = false;
   // イベントハンドラで画面書き換えた後にミスって例外吐くと無限ループになりかねないのであんまりここに処理書きたくない
   const handleChangeNode = () => {
-    if ($('#start_msg').size() + $('#countdown').size() > 0 && !startViewIsShowed) {
+    if (!startViewIsShowed && $('#start_msg').size() + $('#countdown').size() > 0) {
       startViewIsShowed = true;
       handleLoadStartView();
     }
     startViewIsShowed = $('#start_msg').size() + $('#countdown').size() > 0;
 
     // リザルト出た
-    if ($('#current .result_data').size() > 0 && !resultViewIsShowed) {
+    if (!resultViewIsShowed && $('#current .result_data').size() > 0) {
       resultViewIsShowed = true;
       handleShowResult();
     }
