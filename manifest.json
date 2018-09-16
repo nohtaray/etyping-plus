@@ -21,6 +21,7 @@
     "default_popup" : "popup.html"
   },
   "web_accessible_resources": [
+    "src/app.js",
     "src/jquery.balloon.min.js"
   ],
   "icons": {
