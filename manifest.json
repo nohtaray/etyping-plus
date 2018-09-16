@@ -13,7 +13,7 @@
         "https://www.e-typing.ne.jp/*"
       ],
       "js": [
-        "src/script.js"
+        "src/main.js"
       ]
     }
   ],
