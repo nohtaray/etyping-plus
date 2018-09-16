@@ -3,6 +3,34 @@ const handleLoadApp = () => {
 
   const ADD_ROWS = 1;
   const ADD_HEIGHT = 32 * ADD_ROWS;
+  const $ = jQuery;
+
+  {
+    // 打鍵直後の初速表示が有効なときはランキング送信を失敗させる
+    const $originalAjax = $.ajax;
+    $.ajax = (options, ...args) => {
+      if (shouldShowLatencyBalloon && typeof options.url === 'string' && options.url.endsWith('set_ranking.asp')) {
+        return $.Deferred().reject().promise();
+      }
+      return $originalAjax(options, ...args);
+    };
+  }
+
+  const showLatencyBalloon = (latency, target1, target2) => {
+    const color = latency < target1 ? '#dff0d8' : latency < target2 ? '#fcf8e3' : '#f2dede';
+    $('#sentenceText .entered').next().showBalloon({
+      contents: (latency / 1000).toFixed(3), classname: 'balloon', position: 'bottom left', offsetY: -4, offsetX: 50, tipSize: 0, showDuration: 64,
+      showAnimation: function(d, c) { this.fadeIn(d, c); },
+      css: {
+        backgroundColor: color,
+        color: '#636363',
+        boxShadow: '1px 1px 1px #555',
+      },
+    });
+  };
+  const hideLatencyBalloon = () => {
+    $('.balloon').remove();
+  };
 
   const killException = function(f) {
     return function(...args) {
@@ -14,7 +42,9 @@ const handleLoadApp = () => {
     };
   };
 
-  const $ = jQuery;
+  let shouldShowLatencyBalloon;
+  let latencyTarget1;
+  let latencyTarget2;
   let latencies = [];
   let misses = [];
   let times = [];
@@ -31,10 +61,17 @@ const handleLoadApp = () => {
     times.push(wordTime);
     misses.push(wordMiss);
     finishedCount += 1;
+
+    hideLatencyBalloon();
   };
+
   const handleAcceptFirstKey = () => {
     const latency = Date.now() - wordStartTime;
     latencies.push(latency);
+
+    if (shouldShowLatencyBalloon) {
+      showLatencyBalloon(latency, latencyTarget1, latencyTarget2);
+    }
   };
   const handleAccept = () => {
   };
@@ -45,6 +82,8 @@ const handleLoadApp = () => {
     const time = Date.now() - wordStartTime;
     times.push(time);
     misses.push(wordMiss);
+
+    hideLatencyBalloon();
   };
   const handleShowResult = () => {
     console.log({ misses, times, latencies, finishedCount });
@@ -96,6 +135,11 @@ const handleLoadApp = () => {
   };
 
   const handleLoadStartView = () => {
+    const configDiv = $('#config').get(0);
+    shouldShowLatencyBalloon = !!configDiv.dataset.showLatencyBalloon;
+    latencyTarget1 = parseInt(configDiv.dataset.latencyTarget1, 10);
+    latencyTarget2 = parseInt(configDiv.dataset.latencyTarget2, 10);
+
     // タイピング終了時に毎回削除されるので毎回設定する
     // jQuery#on で設定した関数内で例外が発生すると後続の関数も実行されなくなるので例外は潰す
     let waitingAcceptedFirstKey = false;
@@ -151,21 +195,58 @@ const handleLoadApp = () => {
   $('#app').css('height', `+=${ADD_HEIGHT}px`);
 };
 
-// タイピング画面出てたら script を注入する
-setInterval(() => {
+const getConfig = callback => {
+  // -> background.js
+  chrome.runtime.sendMessage(['localStorage', 'getAllItems'], items => {
+    callback.call(null, items);
+  });
+};
+
+// タイピング画面の iframe 要素を取得
+const getAppIframe = () => {
   const appIframe = document.querySelector('iframe[src*="app/standard.asp"]');
-  const scriptId = '__etyping-better-result-script';
   if (!appIframe) return;
   // src は app/standard.asp だけど一度リダイレクトされる
   if (!appIframe.contentWindow.location.pathname.match(/\/app\/jsa_(std|kana)\/typing\.asp/g)) return;
   if (!appIframe.contentDocument.body) return;
+
+  return appIframe;
+};
+
+const updateConfigDiv = (configDiv, config) => {
+  configDiv.dataset.showLatencyBalloon = config['config.showLatencyBalloon'];
+  configDiv.dataset.latencyTarget1 = config['config.latencyTarget1'];
+  configDiv.dataset.latencyTarget2 = config['config.latencyTarget2'];
+};
+
+// タイピング画面出てたら script を注入する
+setInterval(() => {
+  const appIframe = getAppIframe();
+  const scriptId = '__etyping-better-result-script';
+  if (!appIframe) return;
   if (appIframe.contentDocument.getElementById(scriptId)) return;
 
+  // TODO: 整理する。外部ファイルにしたい
   const script = document.createElement('script');
   script.type = 'text/javascript';
   script.id = scriptId;
   script.textContent = `( ${handleLoadApp.toString()} )()`;
+  script.defer = true;
   appIframe.contentDocument.body.appendChild(script);
+
+  const script2 = document.createElement('script');
+  script2.type = 'text/javascript';
+  script2.src = chrome.runtime.getURL('src/jquery.balloon.min.js');
+  script2.async = true;
+  appIframe.contentDocument.body.appendChild(script2);
+
+  const configDiv = document.createElement('div');
+  configDiv.id = 'config';
+  configDiv.style.display = 'none';
+  appIframe.contentDocument.body.appendChild(configDiv);
+  getConfig(config => {
+    updateConfigDiv(configDiv, config);
+  });
 
   // 見た目調整
   const ADD_ROWS = 1;
@@ -177,3 +258,16 @@ setInterval(() => {
   addHeight(document.querySelector('.pp_hoverContainer'), ADD_HEIGHT);
   appIframe.height = parseInt(appIframe.height, 10) + ADD_HEIGHT;
 }, 1000);
+
+// 設定が変更されたら反映する
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (sender.id !== chrome.runtime.id) return;
+  if (Array.isArray(request) && request[0] === 'updateConfig') {
+    const config = request[1];
+    const appIframe = getAppIframe();
+    if (!appIframe) return;
+
+    const configDiv = appIframe.contentDocument.getElementById('config');
+    updateConfigDiv(configDiv, config);
+  }
+});

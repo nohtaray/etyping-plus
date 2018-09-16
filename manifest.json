@@ -4,6 +4,9 @@
   "description": "e-typing のリザルトをいい感じにするやつ",
   "manifest_version": 2,
   "author": "やだ",
+  "background": {
+    "scripts": ["src/background.js"]
+  },
   "content_scripts": [
     {
       "matches": [
@@ -13,6 +16,12 @@
         "src/script.js"
       ]
     }
+  ],
+  "browser_action" : {
+    "default_popup" : "popup.html"
+  },
+  "web_accessible_resources": [
+    "src/jquery.balloon.min.js"
   ],
   "icons": {
     "128": "e128.png"
