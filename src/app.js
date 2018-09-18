@@ -174,8 +174,14 @@ jQuery(function($) {
     // マウスで選択できるようにする
     $('#result').css({ 'user-select': 'text' });
     // 全画面表示ボタン
-    $('<button>全画面表示</button>').addClass('expand_result').appendTo($('#exampleList')).on('click', () => {
+    $('<i class="fas fa-external-link-alt">').addClass('expand_result').appendTo($('#current')).on('click', () => {
       expandResult();
+    }).css({
+      'position': 'absolute',
+      'top': '324px',
+      'left': '350px',
+      'font-size': '18px',
+      'color': '#636363',
     });
   };
 

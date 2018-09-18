@@ -37,6 +37,12 @@ setInterval(() => {
     appIframe.contentDocument.body.appendChild(script);
   });
 
+  // TODO: prefetch する
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://use.fontawesome.com/releases/v5.3.1/css/all.css';
+  appIframe.contentDocument.body.appendChild(link);
+
   const configDiv = document.createElement('div');
   configDiv.id = 'config';
   configDiv.style.display = 'none';
