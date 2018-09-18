@@ -16,6 +16,15 @@ const initializeExpandedResult = () => {
     }
   }
 
+  // 列の中身が全部表示されるようにしつつ高さを揃える
+  const adjustColumnsHeight = () => {
+    $('.exampleList').eq(0).css('height', 'auto');
+    const height1 = parseInt($('.exampleList').eq(0).css('height'), 10);
+    const height2 = parseInt($('.exampleList').eq(1).css('height'), 10);
+    const maxHeight = Math.max(height1, height2);
+    $('.exampleList').css('height', `${maxHeight}px`);
+  };
+
   // 見た目調整
   $('#comment').remove();
   $('#btn_area').remove();
@@ -27,7 +36,9 @@ const initializeExpandedResult = () => {
     $('.exampleList').eq(1).css('left', '387px');
     $('#current').css('width', '964px');
     $('#result>article').css('width', '1104px');
-    $('.exampleList').eq(1).css('height', $('.exampleList').eq(0).css('height'));
+
+    adjustColumnsHeight();
+    $(window).on('resize', () => adjustColumnsHeight());
   }
 };
 
