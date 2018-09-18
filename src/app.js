@@ -1,14 +1,18 @@
 // リザルトを全画面表示したときに注入される
 const initializeExpandedResult = () => {
-  // TODO: 長文は2列にしなくていい
-  // 2列にする
-  $('#exampleList').addClass('exampleList').clone().insertAfter($('#exampleList'));
-  const size = $('.exampleList').eq(0).find('li').size();
-  for (let i = size - 1; i >= 0; i--) {
-    if (i < size / 2) {
-      $('.exampleList').eq(1).find('li').eq(i).remove();
-    } else {
-      $('.exampleList').eq(0).find('li').eq(i).remove();
+  // 同じ id で複数存在すると困るのでクラスで扱う
+  $('#exampleList').addClass('exampleList');
+
+  // 長文以外は2列にする
+  const wordCount = $('.exampleList').eq(0).find('li').size();
+  if (wordCount >= 2) {
+    $('.exampleList').eq(0).clone().insertAfter($('#exampleList').eq(0));
+    for (let i = wordCount - 1; i >= 0; i--) {
+      if (i < wordCount / 2) {
+        $('.exampleList').eq(1).find('li').eq(i).remove();
+      } else {
+        $('.exampleList').eq(0).find('li').eq(i).remove();
+      }
     }
   }
 
@@ -17,11 +21,13 @@ const initializeExpandedResult = () => {
   $('#btn_area').remove();
   $('.expand_result').remove();
   $('#result').css('margin', '12px');
-  $('.exampleList').eq(1).css('left', '387px');
-  $('#current').css('width', '964px');
-  $('#result>article').css('width', '1104px');
   $('#current,#prev,#result>article,.exampleList').css('height', 'auto');
-  $('.exampleList').eq(1).css('height', $('.exampleList').eq(0).css('height'));
+  if (wordCount >= 2) {
+    $('.exampleList').eq(1).css('left', '387px');
+    $('#current').css('width', '964px');
+    $('#result>article').css('width', '1104px');
+    $('.exampleList').eq(1).css('height', $('.exampleList').eq(0).css('height'));
+  }
 };
 
 // タイピング画面に注入される
