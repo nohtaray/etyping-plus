@@ -20,6 +20,7 @@ const initializeExpandedResult = () => {
   $('#comment').remove();
   $('#btn_area').remove();
   $('.expand_result').remove();
+  $('body').css('overflow', 'scroll');
   $('#result').css('margin', '12px');
   $('#current,#prev,#result>article,.exampleList').css('height', 'auto');
   if ($('.exampleList').size() === 2) {
