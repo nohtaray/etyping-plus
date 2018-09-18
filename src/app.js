@@ -1,3 +1,29 @@
+// リザルトを全画面表示したときに注入される
+const initializeExpandedResult = () => {
+  // TODO: 長文は2列にしなくていい
+  // 2列にする
+  $('#exampleList').addClass('exampleList').clone().insertAfter($('#exampleList'));
+  const size = $('.exampleList').eq(0).find('li').size();
+  for (let i = size - 1; i >= 0; i--) {
+    if (i < size / 2) {
+      $('.exampleList').eq(1).find('li').eq(i).remove();
+    } else {
+      $('.exampleList').eq(0).find('li').eq(i).remove();
+    }
+  }
+
+  // 見た目調整
+  $('#comment').remove();
+  $('#btn_area').remove();
+  $('.expand_result').remove();
+  $('#result').css('margin', '12px');
+  $('.exampleList').eq(1).css('left', '387px');
+  $('#current').css('width', '964px');
+  $('#result>article').css('width', '1104px');
+  $('#current,#prev,#result>article,.exampleList').css('height', 'auto');
+  $('.exampleList').eq(1).css('height', $('.exampleList').eq(0).css('height'));
+};
+
 // タイピング画面に注入される
 jQuery(function($) {
   console.log('٩( ๑╹ ꇴ╹)۶');
@@ -40,6 +66,15 @@ jQuery(function($) {
         console.error(e);
       }
     };
+  };
+
+  const expandResult = () => {
+    // 新しいウィンドウに #app をコピーして CSS 読み込み
+    const newDoc = window.open().document;
+    newDoc.write($('#app').html());
+    Array.from($('head>link[rel="stylesheet"]'), style => newDoc.write(style.outerHTML));
+    newDoc.write('<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>');
+    newDoc.write($('<script>').text(`( ${initializeExpandedResult.toString()} )()`).get(0).outerHTML);
   };
 
   let shouldShowLatencyBalloon;
@@ -132,6 +167,10 @@ jQuery(function($) {
     $('#result #prev').css('height', `+=${ADD_HEIGHT}px`);
     // マウスで選択できるようにする
     $('#result').css({ 'user-select': 'text' });
+    // 全画面表示ボタン
+    $('<button>全画面表示</button>').addClass('expand_result').appendTo($('#exampleList')).on('click', () => {
+      expandResult();
+    });
   };
 
   const handleLoadStartView = () => {
