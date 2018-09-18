@@ -191,8 +191,9 @@ jQuery(function($) {
       expandResult();
     }).css({
       'position': 'absolute',
-      'top': '324px',
-      'left': '350px',
+      'padding': '10px',
+      'top': '314px',
+      'left': '340px',
       'font-size': '18px',
       'color': '#636363',
     });
