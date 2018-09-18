@@ -76,7 +76,8 @@ jQuery(function($) {
 
   const expandResult = () => {
     // 新しいウィンドウに #app をコピーして CSS 読み込み
-    const newDoc = window.open().document;
+    // 'about:blank' を指定しないとリサイズができない https://stackoverflow.com/questions/35341839/chrome-zoom-is-not-working-in-child-tab
+    const newDoc = window.open('about:blank').document;
     newDoc.write($('#app').html());
     Array.from($('head>link[rel="stylesheet"]'), style => newDoc.write(style.outerHTML));
     newDoc.write('<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>');
