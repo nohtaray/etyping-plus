@@ -193,9 +193,9 @@ jQuery(function($) {
     }).css({
       'position': 'absolute',
       'padding': '10px',
-      'top': '314px',
-      'left': '340px',
-      'font-size': '18px',
+      'top': '322px',
+      'left': '348px',
+      'font-size': '14px',
       'color': '#636363',
     });
   };
