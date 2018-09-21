@@ -37,11 +37,12 @@ setInterval(() => {
     appIframe.contentDocument.body.appendChild(script);
   });
 
-  // TODO: prefetch する
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'https://use.fontawesome.com/releases/v5.3.1/css/all.css';
-  appIframe.contentDocument.body.appendChild(link);
+  ['fontawesome/css/fontawesome.min.css', 'fontawesome/css/solid.min.css'].forEach(fileName => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = chrome.runtime.getURL(fileName);
+    appIframe.contentDocument.body.appendChild(link);
+  });
 
   const configDiv = document.createElement('div');
   configDiv.id = 'config';

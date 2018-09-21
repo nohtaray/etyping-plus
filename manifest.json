@@ -22,7 +22,8 @@
   },
   "web_accessible_resources": [
     "src/app.js",
-    "src/jquery.balloon.min.js"
+    "src/jquery.balloon.min.js",
+    "fontawesome/*"
   ],
   "icons": {
     "128": "e128.png"
