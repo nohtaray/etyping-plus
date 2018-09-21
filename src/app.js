@@ -21,7 +21,8 @@ const initializeExpandedResult = () => {
     $('.exampleList').css('height', 'auto');
     const height1 = parseInt($('.exampleList').eq(0).css('height') || 0, 10);
     const height2 = parseInt($('.exampleList').eq(1).css('height') || 0, 10);
-    const maxHeight = Math.max(height1, height2);
+    const minResultDataHeight = 318 - 34;
+    const maxHeight = Math.max(height1, height2, minResultDataHeight);
     $('.exampleList').css('height', `${maxHeight}px`);
 
     $('#current,#prev').css('height', `${maxHeight + 83}px`);
