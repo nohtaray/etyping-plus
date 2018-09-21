@@ -17,12 +17,15 @@ const initializeExpandedResult = () => {
   }
 
   // 列の中身が全部表示されるようにしつつ高さを揃える
-  const adjustColumnsHeight = () => {
-    $('.exampleList').eq(0).css('height', 'auto');
-    const height1 = parseInt($('.exampleList').eq(0).css('height'), 10);
-    const height2 = parseInt($('.exampleList').eq(1).css('height'), 10);
+  const adjustHeight = () => {
+    $('.exampleList').css('height', 'auto');
+    const height1 = parseInt($('.exampleList').eq(0).css('height') || 0, 10);
+    const height2 = parseInt($('.exampleList').eq(1).css('height') || 0, 10);
     const maxHeight = Math.max(height1, height2);
     $('.exampleList').css('height', `${maxHeight}px`);
+
+    $('#current,#prev').css('height', `${maxHeight + 83}px`);
+    $('.result_data').css('height', `${maxHeight + 34}px`);
   };
 
   // 見た目調整
@@ -31,15 +34,13 @@ const initializeExpandedResult = () => {
   $('.expand_result').remove();
   $('body').css('overflow', 'scroll');
   $('#result').css('margin', '12px');
-  $('#current,#prev,#result>article,.exampleList').css('height', 'auto');
   if ($('.exampleList').size() === 2) {
     $('.exampleList').eq(1).css('left', '387px');
     $('#current').css('width', '964px');
     $('#result>article').css('width', '1104px');
-
-    adjustColumnsHeight();
-    $(window).on('resize', () => adjustColumnsHeight());
   }
+  adjustHeight();
+  $(window).on('resize', () => adjustHeight());
 };
 
 // タイピング画面に注入される
