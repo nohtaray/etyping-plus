@@ -195,7 +195,7 @@ jQuery(function($) {
       'position': 'absolute',
       'padding': '8px',
       'top': '3px',
-      'right': '3px',
+      'right': '5px',
       'font-size': '14px',
       'color': '#636363',
     }).hover(
