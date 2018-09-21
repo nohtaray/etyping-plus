@@ -192,9 +192,9 @@ jQuery(function($) {
       expandResult();
     }).css({
       'position': 'absolute',
-      'padding': '10px',
-      'top': '322px',
-      'left': '348px',
+      'padding': '8px',
+      'top': '3px',
+      'right': '3px',
       'font-size': '14px',
       'color': '#636363',
     });
