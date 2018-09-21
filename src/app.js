@@ -1,3 +1,48 @@
+// リザルトを全画面表示したときに注入される
+const initializeExpandedResult = () => {
+  // 同じ id で複数存在すると困るのでクラスで扱う
+  $('#exampleList').addClass('exampleList');
+
+  // ワードが少ないときは1列でいい
+  const wordCount = $('.exampleList').eq(0).find('li').size();
+  if (wordCount >= 5) {
+    $('.exampleList').eq(0).clone().insertAfter($('#exampleList').eq(0));
+    for (let i = wordCount - 1; i >= 0; i--) {
+      if (i < wordCount / 2) {
+        $('.exampleList').eq(1).find('li').eq(i).remove();
+      } else {
+        $('.exampleList').eq(0).find('li').eq(i).remove();
+      }
+    }
+  }
+
+  // 列の中身が全部表示されるようにしつつ高さを揃える
+  const adjustHeight = () => {
+    $('.exampleList').css('height', 'auto');
+    const height1 = parseInt($('.exampleList').eq(0).css('height') || 0, 10);
+    const height2 = parseInt($('.exampleList').eq(1).css('height') || 0, 10);
+    const maxHeight = Math.max(height1, height2);
+    $('.exampleList').css('height', `${maxHeight}px`);
+
+    $('#current,#prev').css('height', `${maxHeight + 83}px`);
+    $('.result_data').css('height', `${maxHeight + 34}px`);
+  };
+
+  // 見た目調整
+  $('#comment').remove();
+  $('#btn_area').remove();
+  $('.expand_result').remove();
+  $('body').css('overflow', 'scroll');
+  $('#result').css('margin', '12px');
+  if ($('.exampleList').size() === 2) {
+    $('.exampleList').eq(1).css('left', '387px');
+    $('#current').css('width', '964px');
+    $('#result>article').css('width', '1104px');
+  }
+  adjustHeight();
+  $(window).on('resize', () => adjustHeight());
+};
+
 // タイピング画面に注入される
 jQuery(function($) {
   console.log('٩( ๑╹ ꇴ╹)۶');
@@ -40,6 +85,16 @@ jQuery(function($) {
         console.error(e);
       }
     };
+  };
+
+  const expandResult = () => {
+    // 新しいウィンドウに #app をコピーして CSS 読み込み
+    // 'about:blank' を指定しないとリサイズができない https://stackoverflow.com/questions/35341839/chrome-zoom-is-not-working-in-child-tab
+    const newDoc = window.open('about:blank').document;
+    newDoc.write($('#app').html());
+    Array.from($('head>link[rel="stylesheet"]'), style => newDoc.write(style.outerHTML));
+    newDoc.write('<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>');
+    newDoc.write($('<script>').text(`( ${initializeExpandedResult.toString()} )()`).get(0).outerHTML);
   };
 
   let shouldShowLatencyBalloon;
@@ -132,6 +187,17 @@ jQuery(function($) {
     $('#result #prev').css('height', `+=${ADD_HEIGHT}px`);
     // マウスで選択できるようにする
     $('#result').css({ 'user-select': 'text' });
+    // 全画面表示ボタン
+    $('<i class="fas fa-external-link-alt">').addClass('expand_result').appendTo($('#current')).on('click', () => {
+      expandResult();
+    }).css({
+      'position': 'absolute',
+      'padding': '10px',
+      'top': '322px',
+      'left': '348px',
+      'font-size': '14px',
+      'color': '#636363',
+    });
   };
 
   const handleLoadStartView = () => {

@@ -37,6 +37,13 @@ setInterval(() => {
     appIframe.contentDocument.body.appendChild(script);
   });
 
+  ['fontawesome/css/fontawesome.min.css', 'fontawesome/css/solid.min.css'].forEach(fileName => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = chrome.runtime.getURL(fileName);
+    appIframe.contentDocument.body.appendChild(link);
+  });
+
   const configDiv = document.createElement('div');
   configDiv.id = 'config';
   configDiv.style.display = 'none';
