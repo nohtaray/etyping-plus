@@ -197,7 +197,10 @@ jQuery(function($) {
       'right': '3px',
       'font-size': '14px',
       'color': '#636363',
-    });
+    }).hover(
+        function() { $(this).css('cursor', 'pointer'); },
+        function() { $(this).css('cursor', 'default'); },
+    );
   };
 
   const handleLoadStartView = () => {
