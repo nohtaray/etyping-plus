@@ -204,15 +204,22 @@ jQuery(function($) {
     );
   };
 
-  const handleLoadStartView = () => {
+  const updateConfig = () => {
     const configDiv = $('#config').get(0);
     shouldShowLatencyBalloon = !!configDiv.dataset.showLatencyBalloon;
     latencyTarget1 = parseFloat(configDiv.dataset.latencyTarget1) * 1000;
     latencyTarget2 = parseFloat(configDiv.dataset.latencyTarget2) * 1000;
+  };
+
+  const handleLoadStartView = () => {
+    updateConfig();
 
     // タイピング終了時に毎回削除されるので毎回設定する
     // jQuery#on で設定した関数内で例外が発生すると後続の関数も実行されなくなるので例外は潰す
     let waitingAcceptedFirstKey = false;
+    $(document).on('start_countdown.etyping', killException(() => {
+      updateConfig();
+    }));
     $(document).on('end_countdown.etyping change_complete.etyping', killException(() => {
       handleShowWord();
       waitingAcceptedFirstKey = true;
