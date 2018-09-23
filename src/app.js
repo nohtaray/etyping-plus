@@ -204,6 +204,21 @@ jQuery(function($) {
     );
   };
 
+  const setResultShortcutKeysIfNotYet = () => {
+    const eventNamespace = 'etypingbetterresult';
+    const isSet = ($._data(document).events.keydown || []).some(e => {
+      return e.namespace === eventNamespace;
+    });
+    if (isSet) return;
+
+    $(document).on(`keydown.${eventNamespace}`, e => {
+      // F (Full result)
+      if (e.keyCode === 70) {
+        expandResult();
+      }
+    });
+  };
+
   const updateConfig = () => {
     const configDiv = $('#config').get(0);
     shouldShowLatencyBalloon = !!configDiv.dataset.showLatencyBalloon;
@@ -258,6 +273,10 @@ jQuery(function($) {
       handleShowResult();
     }
     resultViewIsShowed = $('#current .result_data').size() > 0;
+    if (resultViewIsShowed && $('#overlay.on').size() === 0) {
+      // ランキングのモーダル出したりすると消されちゃうので必要に応じて再セットする
+      setResultShortcutKeysIfNotYet();
+    }
   };
 
   const observer = new MutationObserver((...args) => {
