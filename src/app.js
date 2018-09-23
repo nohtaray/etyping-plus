@@ -202,6 +202,14 @@ jQuery(function($) {
         function() { $(this).css('cursor', 'pointer'); },
         function() { $(this).css('cursor', 'default'); },
     );
+    // ショートカットキー
+    // FIXME: ランキングのモーダル出して閉じるとリセットされちゃう
+    $(document).on('keydown', e => {
+      // F (Full result)
+      if (e.keyCode === 70) {
+        expandResult();
+      }
+    })
   };
 
   const updateConfig = () => {
