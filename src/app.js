@@ -204,15 +204,37 @@ jQuery(function($) {
     );
   };
 
-  const handleLoadStartView = () => {
+  const setResultShortcutKeysIfNotYet = () => {
+    const eventNamespace = 'etypingbetterresult';
+    const isSet = ($._data(document).events.keydown || []).some(e => {
+      return e.namespace === eventNamespace;
+    });
+    if (isSet) return;
+
+    $(document).on(`keydown.${eventNamespace}`, e => {
+      // F (Full result)
+      if (e.keyCode === 70) {
+        expandResult();
+      }
+    });
+  };
+
+  const updateConfig = () => {
     const configDiv = $('#config').get(0);
     shouldShowLatencyBalloon = !!configDiv.dataset.showLatencyBalloon;
     latencyTarget1 = parseFloat(configDiv.dataset.latencyTarget1) * 1000;
     latencyTarget2 = parseFloat(configDiv.dataset.latencyTarget2) * 1000;
+  };
+
+  const handleLoadStartView = () => {
+    updateConfig();
 
     // タイピング終了時に毎回削除されるので毎回設定する
     // jQuery#on で設定した関数内で例外が発生すると後続の関数も実行されなくなるので例外は潰す
     let waitingAcceptedFirstKey = false;
+    $(document).on('start_countdown.etyping', killException(() => {
+      updateConfig();
+    }));
     $(document).on('end_countdown.etyping change_complete.etyping', killException(() => {
       handleShowWord();
       waitingAcceptedFirstKey = true;
@@ -251,6 +273,10 @@ jQuery(function($) {
       handleShowResult();
     }
     resultViewIsShowed = $('#current .result_data').size() > 0;
+    if (resultViewIsShowed && $('#overlay.on').size() === 0) {
+      // ランキングのモーダル出したりすると消されちゃうので必要に応じて再セットする
+      setResultShortcutKeysIfNotYet();
+    }
   };
 
   const observer = new MutationObserver((...args) => {
