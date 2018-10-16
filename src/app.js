@@ -105,18 +105,26 @@ jQuery(function($) {
   let latencies = [];
   let misses = [];
   let times = [];
+  let charTimes = [];
+  let missTimes = [];
   let finishedCount = 0;
   let wordStartTime;
   let wordMiss = 0;
+  let wordCharTimes = [];
+  let wordMissTimes = [];
   let previousResult = {};
   const handleShowWord = () => {
     wordStartTime = Date.now();
     wordMiss = 0;
+    wordCharTimes = [];
+    wordMissTimes = [];
   };
   const handleFinishWord = () => {
     const wordTime = Date.now() - wordStartTime;
     times.push(wordTime);
     misses.push(wordMiss);
+    charTimes.push(wordCharTimes);
+    missTimes.push(wordMissTimes);
     finishedCount += 1;
 
     hideLatencyBalloon();
@@ -131,19 +139,27 @@ jQuery(function($) {
     }
   };
   const handleAccept = () => {
+    const time = Date.now() - wordStartTime;
+    wordCharTimes.push(time);
   };
   const handleMiss = () => {
+    const time = Date.now() - wordStartTime;
+    wordMissTimes.push(time);
     wordMiss += 1;
   };
   const handleEscape = () => {
     const time = Date.now() - wordStartTime;
     times.push(time);
     misses.push(wordMiss);
+    charTimes.push(wordCharTimes);
+    missTimes.push(wordMissTimes);
 
     hideLatencyBalloon();
   };
   const handleShowResult = () => {
+    // TODO: 消す
     console.log({ misses, times, latencies, finishedCount });
+    console.log({ charTimes, missTimes });
 
     // ワード詳細
     for (let i = 0; i < finishedCount; i++) {
