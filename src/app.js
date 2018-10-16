@@ -167,9 +167,14 @@ jQuery(function($) {
     $('#current .result_data ul').append(`<li id="latency"><div class="title">Latency</div><div class="data">${latency.toFixed(3)}</div></li>`);
     $('#prev .result_data ul').append(`<li id="previous_latency"><div class="data">${previousResult.latency == null ? '-' : previousResult.latency.toFixed(3)}</div></li>`);
 
-    // 1文字目除いた WPM
-    const timeStr = $('#current .result_data ul .title:contains("入力時間")').next().text();
-    const time = timeStr.replace('秒', '.') * 1000;
+    const parseTime = timeStr => {
+      if (timeStr.includes('分')) {
+        const [m, s] = timeStr.split('分');
+        return m * 60000 + s.replace('秒', '.') * 1000;
+      }
+      return timeStr.replace('秒', '.') * 1000;
+    };
+    const time = parseTime($('#current .result_data ul .title:contains("入力時間")').next().text());
     const charCount = +$('#current .result_data ul .title:contains("入力文字数")').next().text();
     const rkpm = (charCount - latencies.length) / (time - latenciesSum) * 60000;
     $('#current .result_data ul').append(`<li id="rkpm"><div class="title">RKPM</div><div class="data">${rkpm.toFixed(2)}</div></li>`);
