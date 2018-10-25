@@ -1,7 +1,7 @@
 {
   "name": "e-typing plus",
   "version": "1.5.3",
-  "description": "e-typing のリザルトをいい感じにするやつ",
+  "description": "e-typing のリザルト画面を拡張します。",
   "manifest_version": 2,
   "author": "やだ",
   "background": {
