@@ -136,7 +136,8 @@ jQuery(function($) {
     latencies.push(latency);
 
     if (shouldShowLatencyBalloon) {
-      showLatencyBalloon(latency, latencyTarget1, latencyTarget2);
+      // handleAccept の実行が遅くなる（＝文字別タイムが latency と乖離する）ので非同期で表示
+      setTimeout(() => showLatencyBalloon(latency, latencyTarget1, latencyTarget2), 0);
     }
   };
   const handleAccept = () => {
