@@ -168,18 +168,23 @@ jQuery(function($) {
 
     // ワード詳細
     const $sentences = $('#exampleList li .sentence').css('cursor', 'default');
-    for (let i = 0; i < charTimes.filter(t => t.length > 0).length; i++) {
+    for (let i = 0; i < $sentences.size(); i++) {
+      if (charTimes[i] == null || charTimes[i].length === 0) {
+        $sentences.eq(i).fadeTo(0, 0.6);
+        continue;
+      }
+
       // 文字別タイム
       const keys = $sentences.eq(i).text().trim().split('');
       const $keys = keys.map((k, j) => {
         const $key = $('<span>').text(k);
-        if (missTimes[i][j] == null) return $key;
+        if (missTimes[i][j] == null) return $key.fadeTo(0, 0.6);
 
         const loss = Math.max(...missTimes[i][j], 0);
         if (loss > 0) {
           $key.addClass('miss');
         }
-        if (charTimes[i][j] == null) return $key;
+        if (charTimes[i][j] == null) return $key.fadeTo(0, 0.6);
 
         if (loss > 0) {
           return $key.attr('title', `${(charTimes[i][j] / 1000).toFixed(3)} (${(loss / 1000).toFixed(3)})`);
