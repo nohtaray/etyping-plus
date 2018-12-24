@@ -109,15 +109,18 @@ jQuery(function($) {
   let missTimes = [];
   let finishedCount = 0;
   let wordStartTime;
+  let charStartTime;
   let wordMiss = 0;
   let wordCharTimes = [];
   let wordMissTimes = [];
+  let charMissTimes = [];
   let previousResult = {};
   const handleShowWord = () => {
-    wordStartTime = Date.now();
+    wordStartTime = charStartTime = Date.now();
     wordMiss = 0;
     wordCharTimes = [];
     wordMissTimes = [];
+    charMissTimes = [];
   };
   const handleFinishWord = () => {
     const wordTime = Date.now() - wordStartTime;
@@ -139,18 +142,22 @@ jQuery(function($) {
     }
   };
   const handleAccept = () => {
-    const time = Date.now() - wordStartTime;
+    const time = Date.now() - charStartTime;
     wordCharTimes.push(time);
+    wordMissTimes.push(charMissTimes);
+    charStartTime += time;
+    charMissTimes = [];
   };
   const handleMiss = () => {
-    const time = Date.now() - wordStartTime;
-    wordMissTimes.push(time);
+    const time = Date.now() - charStartTime;
+    charMissTimes.push(time);
     wordMiss += 1;
   };
   const handleEscape = () => {
     const time = Date.now() - wordStartTime;
     times.push(time);
     misses.push(wordMiss);
+    wordMissTimes.push(charMissTimes);
     charTimes.push(wordCharTimes);
     missTimes.push(wordMissTimes);
 
@@ -198,6 +205,8 @@ jQuery(function($) {
 
     misses = [];
     times = [];
+    charTimes = [];
+    missTimes = [];
     latencies = [];
     finishedCount = 0;
     previousResult = { latency, rkpm };
