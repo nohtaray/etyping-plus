@@ -42,6 +42,24 @@ const initializeExpandedResult = () => {
   }
   adjustHeight();
   $(window).on('resize', () => adjustHeight());
+
+  // 文字別タイム表示
+  // FIXME: 共通化
+  $('#exampleList li .sentence span[data-tooltip]').each((_, e) => {
+    $(e).balloon({
+      contents: $(e).data('tooltip'),
+      showDuration: 64,
+      minLifetime: 0,
+      tipSize: 0,
+      showAnimation(d, c) { this.fadeIn(d, c); },
+      css: {
+        backgroundColor: '#f7f7f7',
+        color: '#636363',
+        boxShadow: '0',
+        opacity: 1,
+      },
+    });
+  });
 };
 
 // タイピング画面に注入される
@@ -96,6 +114,8 @@ jQuery(function($) {
     Array.from($('head>link[rel="stylesheet"]'), style => newDoc.write(style.outerHTML));
     // TODO: src/ の中から読む
     newDoc.write('<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>');
+    const balloonJsSrc = Array.from(document.scripts, s => s.src).filter(s => s.includes('jquery.balloon'))[0];
+    newDoc.write(`<script type="text/javascript" src="${balloonJsSrc}"></script>`);
     newDoc.write($('<script>').text(`( ${initializeExpandedResult.toString()} )()`).get(0).outerHTML);
   };
 
@@ -190,8 +210,8 @@ jQuery(function($) {
         const toolTip = loss > 0
             ? `${(charTimes[i][j] / 1000).toFixed(3)} (${(loss / 1000).toFixed(3)})`
             : `${(charTimes[i][j] / 1000).toFixed(3)}`;
-        // FIXME: 全画面にすると出ない
-        return $key.attr('data-time', toolTip).balloon({
+        // FIXME: 共通化。全画面の方コピペで定義してるので変えるときは一緒に変えてください
+        return $key.attr('data-tooltip', toolTip).balloon({
           contents: toolTip,
           showDuration: 64,
           minLifetime: 0,
@@ -199,9 +219,9 @@ jQuery(function($) {
           showAnimation(d, c) { this.fadeIn(d, c); },
           css: {
             backgroundColor: '#f7f7f7',
-            color: '#027fff',
-            fontWeight: 'bold',
+            color: '#636363',
             boxShadow: '0',
+            opacity: 1,
           },
         });
       });
