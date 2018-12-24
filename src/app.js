@@ -187,11 +187,23 @@ jQuery(function($) {
         }
         if (charTimes[i][j] == null) return $key.fadeTo(0, 0.6);
 
-        if (loss > 0) {
-          return $key.attr('title', `${(charTimes[i][j] / 1000).toFixed(3)} (${(loss / 1000).toFixed(3)})`);
-        } else {
-          return $key.attr('title', `${(charTimes[i][j] / 1000).toFixed(3)}`);
-        }
+        const toolTip = loss > 0
+            ? `${(charTimes[i][j] / 1000).toFixed(3)} (${(loss / 1000).toFixed(3)})`
+            : `${(charTimes[i][j] / 1000).toFixed(3)}`;
+        // FIXME: 全画面にすると出ない
+        return $key.attr('data-time', toolTip).balloon({
+          contents: toolTip,
+          showDuration: 64,
+          minLifetime: 0,
+          tipSize: 0,
+          showAnimation(d, c) { this.fadeIn(d, c); },
+          css: {
+            backgroundColor: '#f7f7f7',
+            color: '#027fff',
+            fontWeight: 'bold',
+            boxShadow: '0',
+          },
+        });
       });
       $sentences.eq(i).html($keys);
 
