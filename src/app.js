@@ -107,7 +107,6 @@ jQuery(function($) {
   let times = [];
   let charTimes = [];
   let missTimes = [];
-  let finishedCount = 0;
   let wordStartTime;
   let charStartTime;
   let wordMiss = 0;
@@ -128,7 +127,6 @@ jQuery(function($) {
     misses.push(wordMiss);
     charTimes.push(wordCharTimes);
     missTimes.push(wordMissTimes);
-    finishedCount += 1;
 
     hideLatencyBalloon();
   };
@@ -165,20 +163,26 @@ jQuery(function($) {
   };
   const handleShowResult = () => {
     // TODO: 消す
-    console.log({ misses, times, latencies, finishedCount });
+    console.log({ misses, times, latencies });
     console.log({ charTimes, missTimes });
 
     // ワード詳細
     const $sentences = $('#exampleList li .sentence').css('cursor', 'default');
-    // TODO: ワードの途中で Esc しても詳細を表示したい
-    for (let i = 0; i < finishedCount; i++) {
+    for (let i = 0; i < charTimes.filter(t => t.length > 0).length; i++) {
       // 文字別タイム
       const keys = $sentences.eq(i).text().trim().split('');
       const $keys = keys.map((k, j) => {
         const $key = $('<span>').text(k);
+        if (missTimes[i][j] == null) return $key;
+
         const loss = Math.max(...missTimes[i][j], 0);
         if (loss > 0) {
-          return $key.attr('title', `${(charTimes[i][j] / 1000).toFixed(3)} (${(loss / 1000).toFixed(3)})`).addClass('miss');
+          $key.addClass('miss');
+        }
+        if (charTimes[i][j] == null) return $key;
+
+        if (loss > 0) {
+          return $key.attr('title', `${(charTimes[i][j] / 1000).toFixed(3)} (${(loss / 1000).toFixed(3)})`);
         } else {
           return $key.attr('title', `${(charTimes[i][j] / 1000).toFixed(3)}`);
         }
@@ -186,7 +190,7 @@ jQuery(function($) {
       $sentences.eq(i).html($keys);
 
       // ワード別詳細
-      const wordLength = keys.length;
+      const wordLength = charTimes[i].length;
       const kpm = wordLength / times[i] * 60000;
       const rkpm = (wordLength - 1) / (times[i] - latencies[i]) * 60000;
       $('#exampleList li').eq(i).append($('<div>').css({
@@ -224,7 +228,6 @@ jQuery(function($) {
     charTimes = [];
     missTimes = [];
     latencies = [];
-    finishedCount = 0;
     previousResult = { latency, rkpm };
 
     // 見た目調整
