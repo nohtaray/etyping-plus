@@ -50,7 +50,7 @@ const initializeExpandedResult = () => {
       contents: $(e).data('tooltip'),
       showDuration: 64,
       minLifetime: 0,
-      tipSize: 0,
+      tipSize: 4,
       showAnimation(d, c) { this.fadeIn(d, c); },
       css: {
         backgroundColor: '#f7f7f7',
@@ -215,7 +215,7 @@ jQuery(function($) {
           contents: toolTip,
           showDuration: 64,
           minLifetime: 0,
-          tipSize: 0,
+          tipSize: 4,
           showAnimation(d, c) { this.fadeIn(d, c); },
           css: {
             backgroundColor: '#f7f7f7',
