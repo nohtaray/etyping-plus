@@ -47,6 +47,7 @@ const initializeExpandedResult = () => {
   // FIXME: 共通化
   $('#exampleList li .sentence span[data-tooltip]').each((_, e) => {
     $(e).balloon({
+      classname: 'time-balloon',
       contents: $(e).data('tooltip'),
       showDuration: 64,
       minLifetime: 0,
@@ -212,6 +213,7 @@ jQuery(function($) {
             : `${(charTimes[i][j] / 1000).toFixed(3)}`;
         // FIXME: 共通化。全画面の方コピペで定義してるので変えるときは一緒に変えてください
         return $key.attr('data-tooltip', toolTip).balloon({
+          classname: 'time-balloon',
           contents: toolTip,
           showDuration: 64,
           minLifetime: 0,
@@ -313,9 +315,14 @@ jQuery(function($) {
     latencyTarget1 = parseFloat(configDiv.dataset.latencyTarget1) * 1000;
     latencyTarget2 = parseFloat(configDiv.dataset.latencyTarget2) * 1000;
   };
+  const removeTimeBalloons = () => {
+    $('.time-balloon').remove();
+  };
 
   const handleLoadStartView = () => {
     updateConfig();
+    // リザルトで文字別タイムが表示されたまま R でリトライするとツールチップが残ったままになる
+    removeTimeBalloons();
 
     // タイピング終了時に毎回削除されるので毎回設定する
     // jQuery#on で設定した関数内で例外が発生すると後続の関数も実行されなくなるので例外は潰す
