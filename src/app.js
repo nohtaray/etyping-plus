@@ -184,6 +184,14 @@ jQuery(function($) {
     hideLatencyBalloon();
   };
   const handleShowResult = () => {
+    const resultMissCount = +$('#current .result_data ul .title:contains("ミス入力数")').next().text();
+    if (misses.reduce((a, b) => a + b, 0) === resultMissCount - 1) {
+      // 1足りない == LT 機能でミスって終わった
+      const lastWordMissTimes = missTimes[missTimes.length - 1];
+      lastWordMissTimes[lastWordMissTimes.length - 1].push(0);
+      misses[misses.length - 1] += 1;
+    }
+
     // TODO: 消す
     console.log({ misses, times, latencies });
     console.log({ charTimes, missTimes });
@@ -202,13 +210,13 @@ jQuery(function($) {
         const $key = $('<span>').text(k);
         if (missTimes[i][j] == null) return $key.fadeTo(0, 0.6);
 
-        const loss = Math.max(...missTimes[i][j], 0);
-        if (loss > 0) {
+        const loss = Math.max(...missTimes[i][j], -Infinity);
+        if (loss >= 0) {
           $key.addClass('miss');
         }
         if (charTimes[i][j] == null) return $key.fadeTo(0, 0.6);
 
-        const toolTip = loss > 0
+        const toolTip = loss >= 0
             ? `${(charTimes[i][j] / 1000).toFixed(3)} (${(loss / 1000).toFixed(3)})`
             : `${(charTimes[i][j] / 1000).toFixed(3)}`;
         // FIXME: 共通化。全画面の方コピペで定義してるので変えるときは一緒に変えてください
