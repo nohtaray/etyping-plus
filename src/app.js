@@ -42,6 +42,25 @@ const initializeExpandedResult = () => {
   }
   adjustHeight();
   $(window).on('resize', () => adjustHeight());
+
+  // 文字別タイム表示
+  // FIXME: 共通化
+  $('#exampleList li .sentence span[data-tooltip]').each((_, e) => {
+    $(e).balloon({
+      classname: 'time-balloon',
+      contents: $(e).data('tooltip'),
+      showDuration: 64,
+      minLifetime: 0,
+      tipSize: 4,
+      showAnimation(d, c) { this.fadeIn(d, c); },
+      css: {
+        backgroundColor: '#f7f7f7',
+        color: '#636363',
+        boxShadow: '0',
+        opacity: 1,
+      },
+    });
+  });
 };
 
 // タイピング画面に注入される
@@ -96,6 +115,8 @@ jQuery(function($) {
     Array.from($('head>link[rel="stylesheet"]'), style => newDoc.write(style.outerHTML));
     // TODO: src/ の中から読む
     newDoc.write('<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>');
+    const balloonJsSrc = Array.from(document.scripts, s => s.src).filter(s => s.includes('jquery.balloon'))[0];
+    newDoc.write(`<script type="text/javascript" src="${balloonJsSrc}"></script>`);
     newDoc.write($('<script>').text(`( ${initializeExpandedResult.toString()} )()`).get(0).outerHTML);
   };
 
@@ -105,19 +126,28 @@ jQuery(function($) {
   let latencies = [];
   let misses = [];
   let times = [];
-  let finishedCount = 0;
+  let charTimes = [];
+  let missTimes = [];
   let wordStartTime;
+  let charStartTime;
   let wordMiss = 0;
+  let wordCharTimes = [];
+  let wordMissTimes = [];
+  let charMissTimes = [];
   let previousResult = {};
   const handleShowWord = () => {
-    wordStartTime = Date.now();
+    wordStartTime = charStartTime = Date.now();
     wordMiss = 0;
+    wordCharTimes = [];
+    wordMissTimes = [];
+    charMissTimes = [];
   };
   const handleFinishWord = () => {
     const wordTime = Date.now() - wordStartTime;
     times.push(wordTime);
     misses.push(wordMiss);
-    finishedCount += 1;
+    charTimes.push(wordCharTimes);
+    missTimes.push(wordMissTimes);
 
     hideLatencyBalloon();
   };
@@ -127,27 +157,88 @@ jQuery(function($) {
     latencies.push(latency);
 
     if (shouldShowLatencyBalloon) {
-      showLatencyBalloon(latency, latencyTarget1, latencyTarget2);
+      // handleAccept の実行が遅くなる（＝文字別タイムが latency と乖離する）ので非同期で表示
+      setTimeout(() => showLatencyBalloon(latency, latencyTarget1, latencyTarget2), 0);
     }
   };
   const handleAccept = () => {
+    const time = Date.now() - charStartTime;
+    wordCharTimes.push(time);
+    wordMissTimes.push(charMissTimes);
+    charStartTime += time;
+    charMissTimes = [];
   };
   const handleMiss = () => {
+    const time = Date.now() - charStartTime;
+    charMissTimes.push(time);
     wordMiss += 1;
   };
   const handleEscape = () => {
     const time = Date.now() - wordStartTime;
     times.push(time);
     misses.push(wordMiss);
+    wordMissTimes.push(charMissTimes);
+    charTimes.push(wordCharTimes);
+    missTimes.push(wordMissTimes);
 
     hideLatencyBalloon();
   };
   const handleShowResult = () => {
-    console.log({ misses, times, latencies, finishedCount });
+    const resultMissCount = +$('#current .result_data ul .title:contains("ミス入力数")').next().text();
+    if (misses.reduce((a, b) => a + b, 0) === resultMissCount - 1) {
+      // 1足りない == LT 機能でミスって終わった
+      const lastWordMissTimes = missTimes[missTimes.length - 1];
+      lastWordMissTimes[lastWordMissTimes.length - 1].push(0);
+      misses[misses.length - 1] += 1;
+    }
+
+    // TODO: 消す
+    console.log({ misses, times, latencies });
+    console.log({ charTimes, missTimes });
 
     // ワード詳細
-    for (let i = 0; i < finishedCount; i++) {
-      const wordLength = $('#exampleList li .sentence').eq(i).text().trim().length;
+    const $sentences = $('#exampleList li .sentence').css('cursor', 'default');
+    for (let i = 0; i < $sentences.size(); i++) {
+      if (charTimes[i] == null || charTimes[i].length === 0) {
+        $sentences.eq(i).fadeTo(0, 0.6);
+        continue;
+      }
+
+      // 文字別タイム
+      const keys = $sentences.eq(i).text().trim().split('');
+      const $keys = keys.map((k, j) => {
+        const $key = $('<span>').text(k);
+        if (missTimes[i][j] == null) return $key.fadeTo(0, 0.6);
+
+        const loss = Math.max(...missTimes[i][j], -Infinity);
+        if (loss >= 0) {
+          $key.addClass('miss');
+        }
+        if (charTimes[i][j] == null) return $key.fadeTo(0, 0.6);
+
+        const toolTip = loss >= 0
+            ? `${(charTimes[i][j] / 1000).toFixed(3)} (${(loss / 1000).toFixed(3)})`
+            : `${(charTimes[i][j] / 1000).toFixed(3)}`;
+        // FIXME: 共通化。全画面の方コピペで定義してるので変えるときは一緒に変えてください
+        return $key.attr('data-tooltip', toolTip).balloon({
+          classname: 'time-balloon',
+          contents: toolTip,
+          showDuration: 64,
+          minLifetime: 0,
+          tipSize: 4,
+          showAnimation(d, c) { this.fadeIn(d, c); },
+          css: {
+            backgroundColor: '#f7f7f7',
+            color: '#636363',
+            boxShadow: '0',
+            opacity: 1,
+          },
+        });
+      });
+      $sentences.eq(i).html($keys);
+
+      // ワード別詳細
+      const wordLength = charTimes[i].length;
       const kpm = wordLength / times[i] * 60000;
       const rkpm = (wordLength - 1) / (times[i] - latencies[i]) * 60000;
       $('#exampleList li').eq(i).append($('<div>').css({
@@ -182,8 +273,9 @@ jQuery(function($) {
 
     misses = [];
     times = [];
+    charTimes = [];
+    missTimes = [];
     latencies = [];
-    finishedCount = 0;
     previousResult = { latency, rkpm };
 
     // 見た目調整
@@ -231,9 +323,14 @@ jQuery(function($) {
     latencyTarget1 = parseFloat(configDiv.dataset.latencyTarget1) * 1000;
     latencyTarget2 = parseFloat(configDiv.dataset.latencyTarget2) * 1000;
   };
+  const removeTimeBalloons = () => {
+    $('.time-balloon').remove();
+  };
 
   const handleLoadStartView = () => {
     updateConfig();
+    // リザルトで文字別タイムが表示されたまま R でリトライするとツールチップが残ったままになる
+    removeTimeBalloons();
 
     // タイピング終了時に毎回削除されるので毎回設定する
     // jQuery#on で設定した関数内で例外が発生すると後続の関数も実行されなくなるので例外は潰す
