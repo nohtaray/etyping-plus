@@ -12,7 +12,7 @@ var alias = {};
 
 var secretsPath = path.join(__dirname, ("secrets." + env.NODE_ENV + ".js"));
 
-var fileExtensions = ["jpg", "jpeg", "png", "gif", "eot", "otf", "svg", "ttf", "woff", "woff2"];
+var fileExtensions = ["jpg", "jpeg", "png", "gif", "otf"];
 
 if (fileSystem.existsSync(secretsPath)) {
   alias["secrets"] = secretsPath;
@@ -37,8 +37,7 @@ var options = {
     rules: [
       {
         test: /\.css$/,
-        loader: "style-loader!css-loader",
-        exclude: /node_modules/
+        loader: "style-loader!css-loader?sourceMap",
       },
       {
         test: new RegExp('\.(' + fileExtensions.join('|') + ')$'),
@@ -49,6 +48,39 @@ var options = {
         test: /\.html$/,
         loader: "html-loader",
         exclude: /node_modules/
+      },
+      // Fonts
+      {
+        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader",
+        options: {
+          mimetype: 'application/font-woff'
+        }
+      },
+      {
+        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader",
+        options: {
+          mimetype: 'application/font-woff'
+        }
+      },
+      {
+        test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "file-loader"
+      },
+      {
+        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader",
+        options: {
+          mimetype: 'application/octet-stream'
+        }
+      },
+      {
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader",
+        options: {
+          mimetype: 'image/svg+xml'
+        }
       }
     ]
   },
