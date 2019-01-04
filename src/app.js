@@ -268,9 +268,91 @@ function Calculator() {
 
 // ---- ↑集計まわり ----
 
+function setEventHandlers({ $, onLoadStartView, onStartCountdown, onShowWord, onAccept, onMiss, onFinishWord, onEscape, onShowResult, resultShortCutKeys }) {
+  const killException = function(f) {
+    return function(...args) {
+      try {
+        return f.call(this, ...args);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+  };
+
+  const setResultShortcutKeysIfNotYet = () => {
+    const eventNamespace = 'etypingbetterresult';
+    const isSet = ($._data(document).events.keydown || []).some(e => e.namespace === eventNamespace);
+    if (isSet) return;
+
+    $(document).on(`keydown.${eventNamespace}`, (e) => {
+      if (e.keyCode in resultShortCutKeys) {
+        resultShortCutKeys[e.keyCode]();
+      }
+    });
+  };
+
+  let startViewIsShowed = false;
+  let resultViewIsShowed = false;
+  // イベントハンドラで画面書き換えた後にミスって例外吐くと無限ループになりかねないのであんまりここに処理書きたくない
+  const handleChangeNode = () => {
+    if (!startViewIsShowed && $('#start_msg').size() + $('#countdown').size() > 0) {
+      startViewIsShowed = true;
+      onLoadStartView();
+      // タイピング終了時に毎回削除されるので毎回設定する
+      // jQuery#on で設定した関数内で例外が発生すると後続の関数も実行されなくなるので例外は潰す
+      $(document).on('start_countdown.etyping', killException(() => {
+        onStartCountdown();
+      }));
+      $(document).on('end_countdown.etyping change_complete.etyping', killException(() => {
+        onShowWord();
+      }));
+      $(document).on('correct.etyping change_example.etyping complete.etyping', killException(() => {
+        onAccept();
+      }));
+      $(document).on('error.etyping', killException(() => {
+        onMiss();
+      }));
+      $(document).on('change_example.etyping complete.etyping', killException(() => {
+        onFinishWord();
+      }));
+      $(document).on('interrupt.etyping', killException(() => {
+        onEscape();
+      }));
+    }
+    startViewIsShowed = $('#start_msg').size() + $('#countdown').size() > 0;
+
+    // リザルト出た
+    if (!resultViewIsShowed && $('#current .result_data').size() > 0) {
+      resultViewIsShowed = true;
+      onShowResult();
+    }
+    resultViewIsShowed = $('#current .result_data').size() > 0;
+    if (resultViewIsShowed && $('#overlay.on').size() === 0) {
+      // ランキングのモーダル出したりすると消されちゃうので必要に応じて再セットする
+      setResultShortcutKeysIfNotYet();
+    }
+  };
+
+  const observer = new MutationObserver((...args) => {
+    handleChangeNode(args);
+  });
+  observer.observe(document.querySelector('#app'), {
+    childList: true,
+    subtree: true,
+  });
+}
+
 // タイピング画面に注入される
 jQuery(($) => {
   console.log('٩( ๑╹ ꇴ╹)۶');
+
+  let shouldShowLatencyBalloon;
+  let latencyTarget1;
+  let latencyTarget2;
+  let waitingAcceptedFirstKey = false;
+  let showWordTime;
+
+  const calc = Calculator();
 
   {
     // 打鍵直後の初速表示が有効なときはランキング送信を失敗させる
@@ -283,6 +365,12 @@ jQuery(($) => {
     };
   }
 
+  const updateConfig = () => {
+    const configDiv = $('#config').get(0);
+    shouldShowLatencyBalloon = !!configDiv.dataset.showLatencyBalloon;
+    latencyTarget1 = parseFloat(configDiv.dataset.latencyTarget1) * 1000;
+    latencyTarget2 = parseFloat(configDiv.dataset.latencyTarget2) * 1000;
+  };
   const showLatencyBalloon = (latency, target1, target2) => {
     const color = latency < target1 ? '#dff0d8' : latency < target2 ? '#fcf8e3' : '#f2dede';
     $('#sentenceText .entered').next().showBalloon({
@@ -304,63 +392,26 @@ jQuery(($) => {
   const hideLatencyBalloon = () => {
     $('.balloon').remove();
   };
-
-  const killException = function(f) {
-    return function(...args) {
-      try {
-        return f.call(this, ...args);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-  };
-
-  let shouldShowLatencyBalloon;
-  let latencyTarget1;
-  let latencyTarget2;
-  const calc = Calculator();
-
-  const setResultShortcutKeysIfNotYet = () => {
-    const eventNamespace = 'etypingbetterresult';
-    const isSet = ($._data(document).events.keydown || []).some(e => e.namespace === eventNamespace);
-    if (isSet) return;
-
-    $(document).on(`keydown.${eventNamespace}`, (e) => {
-      // F (Full result)
-      if (e.keyCode === 70) {
-        expandResult();
-      }
-    });
-  };
-
-  const updateConfig = () => {
-    const configDiv = $('#config').get(0);
-    shouldShowLatencyBalloon = !!configDiv.dataset.showLatencyBalloon;
-    latencyTarget1 = parseFloat(configDiv.dataset.latencyTarget1) * 1000;
-    latencyTarget2 = parseFloat(configDiv.dataset.latencyTarget2) * 1000;
-  };
   const removeTimeBalloons = () => {
     $('.time-balloon').remove();
   };
 
-  const handleLoadStartView = () => {
-    updateConfig();
-    // リザルトで文字別タイムが表示されたまま R でリトライするとツールチップが残ったままになる
-    removeTimeBalloons();
-
-    let waitingAcceptedFirstKey = false;
-    let showWordTime;
-    // タイピング終了時に毎回削除されるので毎回設定する
-    // jQuery#on で設定した関数内で例外が発生すると後続の関数も実行されなくなるので例外は潰す
-    $(document).on('start_countdown.etyping', killException(() => {
+  setEventHandlers({
+    $,
+    onLoadStartView: () => {
       updateConfig();
-    }));
-    $(document).on('end_countdown.etyping change_complete.etyping', killException(() => {
+      // リザルトで文字別タイムが表示されたまま R でリトライするとツールチップが残ったままになる
+      removeTimeBalloons();
+    },
+    onStartCountdown: () => {
+      updateConfig();
+    },
+    onShowWord: () => {
       showWordTime = Date.now();
       calc.handleShowWord(showWordTime);
       waitingAcceptedFirstKey = true;
-    }));
-    $(document).on('correct.etyping change_example.etyping complete.etyping', killException(() => {
+    },
+    onAccept: () => {
       const now = Date.now();
       if (waitingAcceptedFirstKey) {
         calc.handleAcceptFirstKey(now);
@@ -370,48 +421,27 @@ jQuery(($) => {
         waitingAcceptedFirstKey = false;
       }
       calc.handleAccept(now);
-    }));
-    $(document).on('error.etyping', killException(() => {
+    },
+    onMiss: () => {
       calc.handleMiss(Date.now());
-    }));
-    $(document).on('change_example.etyping complete.etyping', killException(() => {
+    },
+    onFinishWord: () => {
       calc.handleFinishWord(Date.now());
       hideLatencyBalloon();
-    }));
-    $(document).on('interrupt.etyping', killException(() => {
+    },
+    onEscape: () => {
       calc.handleEscape(Date.now());
       hideLatencyBalloon();
-    }));
-  };
-
-  let startViewIsShowed = false;
-  let resultViewIsShowed = false;
-  // イベントハンドラで画面書き換えた後にミスって例外吐くと無限ループになりかねないのであんまりここに処理書きたくない
-  const handleChangeNode = () => {
-    if (!startViewIsShowed && $('#start_msg').size() + $('#countdown').size() > 0) {
-      startViewIsShowed = true;
-      handleLoadStartView();
-    }
-    startViewIsShowed = $('#start_msg').size() + $('#countdown').size() > 0;
-
-    // リザルト出た
-    if (!resultViewIsShowed && $('#current .result_data').size() > 0) {
-      resultViewIsShowed = true;
+    },
+    onShowResult: () => {
       calc.handleShowResult();
-    }
-    resultViewIsShowed = $('#current .result_data').size() > 0;
-    if (resultViewIsShowed && $('#overlay.on').size() === 0) {
-      // ランキングのモーダル出したりすると消されちゃうので必要に応じて再セットする
-      setResultShortcutKeysIfNotYet();
-    }
-  };
-
-  const observer = new MutationObserver((...args) => {
-    handleChangeNode(args);
-  });
-  observer.observe(document.querySelector('#app'), {
-    childList: true,
-    subtree: true,
+    },
+    resultShortCutKeys: {
+      // F (Full result)
+      70: () => {
+        expandResult();
+      },
+    },
   });
 
   // 見た目調整
