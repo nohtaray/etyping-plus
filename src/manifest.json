@@ -5,7 +5,9 @@
   "manifest_version": 2,
   "author": "やだ",
   "background": {
-    "scripts": ["src/background.js"]
+    "scripts": [
+      "background.bundle.js"
+    ]
   },
   "content_scripts": [
     {
@@ -13,19 +15,18 @@
         "https://www.e-typing.ne.jp/*"
       ],
       "js": [
-        "src/main.js"
+        "content.bundle.js"
       ]
     }
   ],
-  "browser_action" : {
-    "default_popup" : "popup.html"
+  "browser_action": {
+    "default_popup": "popup.html"
   },
   "web_accessible_resources": [
-    "src/jquery.balloon.min.js",
-    "src/app/*",
-    "fontawesome/*"
+    "app.bundle.js"
   ],
   "icons": {
     "128": "e128.png"
-  }
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }

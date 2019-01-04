@@ -1,5 +1,5 @@
 // TODO: クラス化
-const Calculator = ({ $, expandResult, extendResult }) => {
+export default ({ $, expandResult, extendResult }) => {
   let latencies = [];
   let misses = [];
   let times = [];

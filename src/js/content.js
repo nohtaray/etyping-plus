@@ -28,20 +28,13 @@ setInterval(() => {
   if (!appIframe) return;
   if (appIframe.contentDocument.getElementsByClassName(chrome.runtime.id).length > 0) return;
 
-  ['src/app/calculator.js', 'src/app/main.js', 'src/jquery.balloon.min.js'].forEach(fileName => {
+  ['app.bundle.js'].forEach(fileName => {
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.className = chrome.runtime.id;
     script.src = chrome.runtime.getURL(fileName);
     script.async = true;
     appIframe.contentDocument.body.appendChild(script);
-  });
-
-  ['fontawesome/css/fontawesome.min.css', 'fontawesome/css/solid.min.css'].forEach(fileName => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = chrome.runtime.getURL(fileName);
-    appIframe.contentDocument.body.appendChild(link);
   });
 
   const configDiv = document.createElement('div');
