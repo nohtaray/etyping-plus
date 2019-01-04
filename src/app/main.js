@@ -80,7 +80,7 @@ const ADD_ROWS = 1;
 const ADD_HEIGHT = 32 * ADD_ROWS;
 
 // ---- リザルト拡張まわり ----
-function showWordDetail(charTimes, $sentence, missTimes, time, latency, miss) {
+const showWordDetail = (charTimes, $sentence, missTimes, time, latency, miss) => {
   if (charTimes == null || charTimes.length === 0) {
     $sentence.fadeTo(0, 0.6);
     return;
@@ -128,9 +128,9 @@ function showWordDetail(charTimes, $sentence, missTimes, time, latency, miss) {
     position: 'relative',
     top: '-2px',
   }).text(`latency: ${(latency / 1000).toFixed(3)}, kpm: ${kpm.toFixed(0)}, rkpm: ${rkpm.toFixed(0)}, miss: ${miss.toFixed(0)}`));
-}
+};
 
-function extendResult({ misses, times, latencies, charTimes, missTimes, previousResult, expandResult, rkpm, latency }) {
+const extendResult = ({ misses, times, latencies, charTimes, missTimes, previousResult, expandResult, rkpm, latency }) => {
   // ワード詳細
   const $sentences = $('#exampleList li .sentence').css('cursor', 'default');
   for (let i = 0; i < $sentences.size(); i++) {
@@ -171,14 +171,14 @@ function extendResult({ misses, times, latencies, charTimes, missTimes, previous
       function() { $(this).css('cursor', 'pointer'); },
       function() { $(this).css('cursor', 'default'); },
   );
-}
+};
 
 // ---- ↑リザルト拡張まわり ----
 
 // ---- 集計まわり ----
 
 // TODO: クラス化
-function Calculator() {
+const Calculator = () => {
   let latencies = [];
   let misses = [];
   let times = [];
@@ -264,11 +264,11 @@ function Calculator() {
     latencies = [];
   };
   return { handleShowWord, handleFinishWord, handleAcceptFirstKey, handleAccept, handleMiss, handleEscape, handleShowResult };
-}
+};
 
 // ---- ↑集計まわり ----
 
-function setEventHandlers({ $, onLoadStartView, onStartCountdown, onShowWord, onAccept, onMiss, onFinishWord, onEscape, onShowResult, resultShortCutKeys }) {
+const setEventHandlers = ({ $, onLoadStartView, onStartCountdown, onShowWord, onAccept, onMiss, onFinishWord, onEscape, onShowResult, resultShortCutKeys }) => {
   const killException = function(f) {
     return function(...args) {
       try {
@@ -340,7 +340,7 @@ function setEventHandlers({ $, onLoadStartView, onStartCountdown, onShowWord, on
     childList: true,
     subtree: true,
   });
-}
+};
 
 // タイピング画面に注入される
 jQuery(($) => {
