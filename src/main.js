@@ -28,7 +28,7 @@ setInterval(() => {
   if (!appIframe) return;
   if (appIframe.contentDocument.getElementsByClassName(chrome.runtime.id).length > 0) return;
 
-  ['src/app/main.js', 'src/jquery.balloon.min.js'].forEach(fileName => {
+  ['src/app/calculator.js', 'src/app/main.js', 'src/jquery.balloon.min.js'].forEach(fileName => {
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.className = chrome.runtime.id;
