@@ -175,6 +175,99 @@ function extendResult({ misses, times, latencies, charTimes, missTimes, previous
 
 // ---- ↑リザルト拡張まわり ----
 
+// ---- 集計まわり ----
+
+// TODO: クラス化
+function Calculator() {
+  let latencies = [];
+  let misses = [];
+  let times = [];
+  let charTimes = [];
+  let missTimes = [];
+  let wordStartTime;
+  let charStartTime;
+  let wordMiss = 0;
+  let wordCharTimes = [];
+  let wordMissTimes = [];
+  let charMissTimes = [];
+  let previousResult = {};
+  const handleShowWord = (now) => {
+    wordStartTime = charStartTime = now;
+    wordMiss = 0;
+    wordCharTimes = [];
+    wordMissTimes = [];
+    charMissTimes = [];
+  };
+  const handleFinishWord = (now) => {
+    const wordTime = now - wordStartTime;
+    times.push(wordTime);
+    misses.push(wordMiss);
+    charTimes.push(wordCharTimes);
+    missTimes.push(wordMissTimes);
+  };
+
+  const handleAcceptFirstKey = (now) => {
+    const latency = now - wordStartTime;
+    latencies.push(latency);
+  };
+  const handleAccept = (now) => {
+    const time = now - charStartTime;
+    wordCharTimes.push(time);
+    wordMissTimes.push(charMissTimes);
+    charStartTime += time;
+    charMissTimes = [];
+  };
+  const handleMiss = (now) => {
+    const time = now - charStartTime;
+    charMissTimes.push(time);
+    wordMiss += 1;
+  };
+  const handleEscape = (now) => {
+    const time = now - wordStartTime;
+    times.push(time);
+    misses.push(wordMiss);
+    wordMissTimes.push(charMissTimes);
+    charTimes.push(wordCharTimes);
+    missTimes.push(wordMissTimes);
+  };
+  const handleShowResult = () => {
+    const resultMissCount = +$('#current .result_data ul .title:contains("ミス入力数")').next().text();
+    if (misses.reduce((a, b) => a + b, 0) === resultMissCount - 1) {
+      // 1足りない == LT 機能でミスって終わった
+      const lastWordMissTimes = missTimes[missTimes.length - 1];
+      lastWordMissTimes[lastWordMissTimes.length - 1].push(0);
+      misses[misses.length - 1] += 1;
+    }
+
+    const parseTime = (timeStr) => {
+      if (timeStr.includes('分')) {
+        const [m, s] = timeStr.split('分');
+        return m * 60000 + s.replace('秒', '.') * 1000;
+      }
+      return timeStr.replace('秒', '.') * 1000;
+    };
+    const latenciesSum = latencies.map(a => +a).reduce((a, b) => a + b, 0);
+    const time = parseTime($('#current .result_data ul .title:contains("入力時間")').next().text());
+    const charCount = +$('#current .result_data ul .title:contains("入力文字数")').next().text();
+    const latency = latenciesSum / latencies.length / 1000;
+    const rkpm = (charCount - latencies.length) / (time - latenciesSum) * 60000;
+    // TODO: 外から呼び出す
+    extendResult({
+      misses, times, latencies, charTimes, missTimes, previousResult, expandResult, latency, rkpm,
+    });
+
+    previousResult = { latency, rkpm };
+    misses = [];
+    times = [];
+    charTimes = [];
+    missTimes = [];
+    latencies = [];
+  };
+  return { handleShowWord, handleFinishWord, handleAcceptFirstKey, handleAccept, handleMiss, handleEscape, handleShowResult };
+}
+
+// ---- ↑集計まわり ----
+
 // タイピング画面に注入される
 jQuery(($) => {
   console.log('٩( ๑╹ ꇴ╹)۶');
@@ -225,98 +318,7 @@ jQuery(($) => {
   let shouldShowLatencyBalloon;
   let latencyTarget1;
   let latencyTarget2;
-  let latencies = [];
-  let misses = [];
-  let times = [];
-  let charTimes = [];
-  let missTimes = [];
-  let wordStartTime;
-  let charStartTime;
-  let wordMiss = 0;
-  let wordCharTimes = [];
-  let wordMissTimes = [];
-  let charMissTimes = [];
-  let previousResult = {};
-  const handleShowWord = () => {
-    wordStartTime = charStartTime = Date.now();
-    wordMiss = 0;
-    wordCharTimes = [];
-    wordMissTimes = [];
-    charMissTimes = [];
-  };
-  const handleFinishWord = () => {
-    const wordTime = Date.now() - wordStartTime;
-    times.push(wordTime);
-    misses.push(wordMiss);
-    charTimes.push(wordCharTimes);
-    missTimes.push(wordMissTimes);
-
-    hideLatencyBalloon();
-  };
-
-  const handleAcceptFirstKey = () => {
-    const latency = Date.now() - wordStartTime;
-    latencies.push(latency);
-
-    if (shouldShowLatencyBalloon) {
-      // handleAccept の実行が遅くなる（＝文字別タイムが latency と乖離する）ので非同期で表示
-      setTimeout(() => showLatencyBalloon(latency, latencyTarget1, latencyTarget2), 0);
-    }
-  };
-  const handleAccept = () => {
-    const time = Date.now() - charStartTime;
-    wordCharTimes.push(time);
-    wordMissTimes.push(charMissTimes);
-    charStartTime += time;
-    charMissTimes = [];
-  };
-  const handleMiss = () => {
-    const time = Date.now() - charStartTime;
-    charMissTimes.push(time);
-    wordMiss += 1;
-  };
-  const handleEscape = () => {
-    const time = Date.now() - wordStartTime;
-    times.push(time);
-    misses.push(wordMiss);
-    wordMissTimes.push(charMissTimes);
-    charTimes.push(wordCharTimes);
-    missTimes.push(wordMissTimes);
-
-    hideLatencyBalloon();
-  };
-  const handleShowResult = () => {
-    const resultMissCount = +$('#current .result_data ul .title:contains("ミス入力数")').next().text();
-    if (misses.reduce((a, b) => a + b, 0) === resultMissCount - 1) {
-      // 1足りない == LT 機能でミスって終わった
-      const lastWordMissTimes = missTimes[missTimes.length - 1];
-      lastWordMissTimes[lastWordMissTimes.length - 1].push(0);
-      misses[misses.length - 1] += 1;
-    }
-
-    const parseTime = (timeStr) => {
-      if (timeStr.includes('分')) {
-        const [m, s] = timeStr.split('分');
-        return m * 60000 + s.replace('秒', '.') * 1000;
-      }
-      return timeStr.replace('秒', '.') * 1000;
-    };
-    const latenciesSum = latencies.map(a => +a).reduce((a, b) => a + b, 0);
-    const time = parseTime($('#current .result_data ul .title:contains("入力時間")').next().text());
-    const charCount = +$('#current .result_data ul .title:contains("入力文字数")').next().text();
-    const latency = latenciesSum / latencies.length / 1000;
-    const rkpm = (charCount - latencies.length) / (time - latenciesSum) * 60000;
-    extendResult({
-      misses, times, latencies, charTimes, missTimes, previousResult, expandResult, latency, rkpm,
-    });
-
-    previousResult = { latency, rkpm };
-    misses = [];
-    times = [];
-    charTimes = [];
-    missTimes = [];
-    latencies = [];
-  };
+  const calc = Calculator();
 
   const setResultShortcutKeysIfNotYet = () => {
     const eventNamespace = 'etypingbetterresult';
@@ -346,31 +348,39 @@ jQuery(($) => {
     // リザルトで文字別タイムが表示されたまま R でリトライするとツールチップが残ったままになる
     removeTimeBalloons();
 
+    let waitingAcceptedFirstKey = false;
+    let showWordTime;
     // タイピング終了時に毎回削除されるので毎回設定する
     // jQuery#on で設定した関数内で例外が発生すると後続の関数も実行されなくなるので例外は潰す
-    let waitingAcceptedFirstKey = false;
     $(document).on('start_countdown.etyping', killException(() => {
       updateConfig();
     }));
     $(document).on('end_countdown.etyping change_complete.etyping', killException(() => {
-      handleShowWord();
+      showWordTime = Date.now();
+      calc.handleShowWord(showWordTime);
       waitingAcceptedFirstKey = true;
     }));
     $(document).on('correct.etyping change_example.etyping complete.etyping', killException(() => {
+      const now = Date.now();
       if (waitingAcceptedFirstKey) {
-        handleAcceptFirstKey();
+        calc.handleAcceptFirstKey(now);
+        if (shouldShowLatencyBalloon) {
+          showLatencyBalloon(now - showWordTime, latencyTarget1, latencyTarget2);
+        }
         waitingAcceptedFirstKey = false;
       }
-      handleAccept();
+      calc.handleAccept(now);
     }));
     $(document).on('error.etyping', killException(() => {
-      handleMiss();
+      calc.handleMiss(Date.now());
     }));
     $(document).on('change_example.etyping complete.etyping', killException(() => {
-      handleFinishWord();
+      calc.handleFinishWord(Date.now());
+      hideLatencyBalloon();
     }));
     $(document).on('interrupt.etyping', killException(() => {
-      handleEscape();
+      calc.handleEscape(Date.now());
+      hideLatencyBalloon();
     }));
   };
 
@@ -387,7 +397,7 @@ jQuery(($) => {
     // リザルト出た
     if (!resultViewIsShowed && $('#current .result_data').size() > 0) {
       resultViewIsShowed = true;
-      handleShowResult();
+      calc.handleShowResult();
     }
     resultViewIsShowed = $('#current .result_data').size() > 0;
     if (resultViewIsShowed && $('#overlay.on').size() === 0) {
