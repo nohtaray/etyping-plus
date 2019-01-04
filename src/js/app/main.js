@@ -1,3 +1,7 @@
+import './jquery.balloon.min.js';
+import '../../fontawesome';
+import Calculator from './calculator';
+
 // リザルトを全画面表示したときに注入される
 const initializeExpandedResult = () => {
   // 同じ id で複数存在すると困るのでクラスで扱う
