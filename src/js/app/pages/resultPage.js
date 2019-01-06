@@ -1,5 +1,5 @@
 import '../jquery.balloon.min';
-import '../../../fontawesome';
+import '../../fontawesome';
 import {setTimeTooltip} from '../timeTooltip';
 import {ADD_HEIGHT} from '../constants';
 import {OriginalResult} from '../models';
