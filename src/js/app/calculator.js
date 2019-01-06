@@ -1,5 +1,5 @@
 // TODO: クラス化
-export default ({ $, expandResult, extendResult }) => {
+export default ({ $, extendResult }) => {
   let latencies = [];
   let misses = [];
   let times = [];
@@ -74,7 +74,7 @@ export default ({ $, expandResult, extendResult }) => {
     const rkpm = (charCount - latencies.length) / (time - latenciesSum) * 60000;
     // TODO: 外から呼び出す
     extendResult({
-      misses, times, latencies, charTimes, missTimes, previousResult, expandResult, latency, rkpm,
+      misses, times, latencies, charTimes, missTimes, previousResult, latency, rkpm,
     });
 
     previousResult = { latency, rkpm };
