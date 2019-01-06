@@ -59,8 +59,7 @@ class MainPage {
     }).text(`latency: ${(latency / 1000).toFixed(3)}, kpm: ${kpm.toFixed(0)}, rkpm: ${rkpm.toFixed(0)}, miss: ${miss.toFixed(0)}`));
   }
 
-  extendResult({ misses, times, latencies, charTimes, missTimes, previousResult, rkpm, latency }) {
-    console.log(this);
+  extendResult({ misses, times, latencies, charTimes, missTimes, rkpm, latency, previousResult }) {
     // ワード詳細
     const $sentences = $('#exampleList li .sentence').css('cursor', 'default');
     for (let i = 0; i < $sentences.size(); i++) {
@@ -73,11 +72,11 @@ class MainPage {
 
     // 初速
     $('#current .result_data ul').append(`<li id="latency"><div class="title">Latency</div><div class="data">${latency.toFixed(3)}</div></li>`);
-    $('#prev .result_data ul').append(`<li id="previous_latency"><div class="data">${previousResult.latency == null ? '-' : previousResult.latency.toFixed(3)}</div></li>`);
+    $('#prev .result_data ul').append(`<li id="previous_latency"><div class="data">${previousResult == null ? '-' : previousResult.latency.toFixed(3)}</div></li>`);
 
     // RKPM
     $('#current .result_data ul').append(`<li id="rkpm"><div class="title">RKPM</div><div class="data">${rkpm.toFixed(2)}</div></li>`);
-    $('#prev .result_data ul').append(`<li id="previous_rkpm"><div class="data">${previousResult.rkpm == null ? '-' : previousResult.rkpm.toFixed(2)}</div></li>`);
+    $('#prev .result_data ul').append(`<li id="previous_rkpm"><div class="data">${previousResult == null ? '-' : previousResult.rkpm.toFixed(2)}</div></li>`);
 
     // 見た目調整
     $('#result article').css('height', `+=${this.ADD_HEIGHT}px`);
@@ -211,9 +210,10 @@ jQuery(($) => {
   let extensionRootPath;
   let waitingAcceptedFirstKey = false;
   let showWordTime;
+  let previousResult;
 
   const page = new MainPage();
-  const calc = new Calculator({ $, extendResult: page.extendResult.bind(page) });
+  let calc = new Calculator({ $, extendResult: page.extendResult.bind(page) });
 
   {
     // 打鍵直後の初速表示が有効なときはランキング送信を失敗させる
@@ -240,6 +240,7 @@ jQuery(($) => {
       updateConfig();
       // リザルトで文字別タイムが表示されたまま R でリトライするとツールチップが残ったままになる
       removeAllTimeTooltips();
+      calc = new Calculator({ $, extendResult: page.extendResult.bind(page) });
     },
     onStartCountdown: () => {
       updateConfig();
@@ -273,6 +274,17 @@ jQuery(($) => {
     },
     onShowResult: () => {
       calc.handleShowResult();
+      page.extendResult({
+        misses: calc.result.misses,
+        times: calc.result.times,
+        latencies: calc.result.latencies,
+        charTimes: calc.result.charTimes,
+        missTimes: calc.result.missTimes,
+        latency: calc.result.latency,
+        rkpm: calc.result.rkpm,
+        previousResult,
+      });
+      previousResult = calc.result;
     },
     resultShortCutKeys: {
       // F (Full result)

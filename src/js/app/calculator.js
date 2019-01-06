@@ -1,4 +1,16 @@
-export default class Calculator {
+class Result {
+  constructor({ misses, times, latencies, charTimes, missTimes, latency, rkpm }) {
+    this.misses = misses;
+    this.times = times;
+    this.latencies = latencies;
+    this.charTimes = charTimes;
+    this.missTimes = missTimes;
+    this.latency = latency;
+    this.rkpm = rkpm;
+  }
+}
+
+export default class {
   constructor({ $, extendResult }) {
     // TODO: jQuery にアクセスしない
     this.$ = $;
@@ -9,13 +21,14 @@ export default class Calculator {
     this.times = [];
     this.charTimes = [];
     this.missTimes = [];
+    this.result = null;
+
     this.wordStartTime = null;
     this.charStartTime = null;
     this.wordMiss = 0;
     this.wordCharTimes = [];
     this.wordMissTimes = [];
     this.charMissTimes = [];
-    this.previousResult = {};
   }
 
   handleShowWord(now) {
@@ -84,19 +97,17 @@ export default class Calculator {
     const charCount = +this.$('#current .result_data ul .title:contains("入力文字数")').next().text();
     const latency = latenciesSum / this.latencies.length / 1000;
     const rkpm = (charCount - this.latencies.length) / (time - latenciesSum) * 60000;
-    // TODO: 外から呼び出す
-    this.extendResult({
+
+    this.result = new Result({
       misses: this.misses,
       times: this.times,
       latencies: this.latencies,
       charTimes: this.charTimes,
       missTimes: this.missTimes,
-      previousResult: this.previousResult,
       latency,
       rkpm,
     });
 
-    this.previousResult = { latency, rkpm };
     this.misses = [];
     this.times = [];
     this.charTimes = [];
