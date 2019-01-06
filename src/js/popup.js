@@ -1,3 +1,5 @@
+import '../css/popup.css';
+
 window.onload = () => {
   const q = (...args) => document.querySelector(...args);
   const CONFIG_SHOW_LATENCY_BALLOON = 'config.showLatencyBalloon';
