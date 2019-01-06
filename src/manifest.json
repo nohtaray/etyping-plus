@@ -23,6 +23,7 @@
     "default_popup": "popup.html"
   },
   "web_accessible_resources": [
+    "jquery.js",
     "app.bundle.js",
     "expanded.bundle.js"
   ],

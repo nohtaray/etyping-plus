@@ -39,8 +39,7 @@ export default class ResultPage {
     const newDoc = window.open('about:blank').document;
     newDoc.write($('#app').html());
     Array.from($('head>link[rel="stylesheet"]'), style => newDoc.write(style.outerHTML));
-    // TODO: src/ の中から読む
-    newDoc.write('<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>');
+    newDoc.write(`<script type="text/javascript" src="${this._extensionRootPath}jquery.js"></script>`);
     newDoc.write(`<script type="text/javascript" src="${this._extensionRootPath}expanded.bundle.js"></script>`);
   }
 

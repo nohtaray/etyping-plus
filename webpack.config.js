@@ -122,6 +122,14 @@ const options = {
       chunks: ['background'],
     }),
     new WriteFilePlugin(),
+
+    // jQuery のプラグインがグローバルに $ オブジェクトがあることを前提としているので、<script> タグで読み込みたい
+    new CopyWebpackPlugin([
+      {
+        from: 'src/js/app/jquery.2.2.4.min.js',
+        to: 'jquery.js',
+      },
+    ]),
   ],
 };
 
