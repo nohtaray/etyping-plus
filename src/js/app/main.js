@@ -1,73 +1,8 @@
-import './jquery.balloon.min.js';
+import './jquery.balloon.min';
 import '../../fontawesome';
 import Calculator from './calculator';
 
-// リザルトを全画面表示したときに注入される
-const initializeExpandedResult = () => {
-  // 同じ id で複数存在すると困るのでクラスで扱う
-  $('#exampleList').addClass('exampleList');
-
-  // ワードが少ないときは1列でいい
-  const wordCount = $('.exampleList').eq(0).find('li').size();
-  if (wordCount >= 5) {
-    $('.exampleList').eq(0).clone().insertAfter($('#exampleList').eq(0));
-    for (let i = wordCount - 1; i >= 0; i--) {
-      if (i < wordCount / 2) {
-        $('.exampleList').eq(1).find('li').eq(i).remove();
-      } else {
-        $('.exampleList').eq(0).find('li').eq(i).remove();
-      }
-    }
-  }
-
-  // 列の中身が全部表示されるようにしつつ高さを揃える
-  const adjustHeight = () => {
-    $('.exampleList').css('height', 'auto');
-    const height1 = parseInt($('.exampleList').eq(0).css('height') || 0, 10);
-    const height2 = parseInt($('.exampleList').eq(1).css('height') || 0, 10);
-    const minResultDataHeight = 318 - 34;
-    const maxHeight = Math.max(height1, height2, minResultDataHeight);
-    $('.exampleList').css('height', `${maxHeight}px`);
-
-    $('#current,#prev').css('height', `${maxHeight + 83}px`);
-    $('.result_data').css('height', `${maxHeight + 34}px`);
-  };
-
-  // 見た目調整
-  $('#comment').remove();
-  $('#btn_area').remove();
-  $('.expand_result').remove();
-  $('body').css('overflow', 'scroll');
-  $('#result').css('margin', '12px');
-  if ($('.exampleList').size() === 2) {
-    $('.exampleList').eq(1).css('left', '387px');
-    $('#current').css('width', '964px');
-    $('#result>article').css('width', '1104px');
-  }
-  adjustHeight();
-  $(window).on('resize', () => adjustHeight());
-
-  // 文字別タイム表示
-  // FIXME: 共通化
-  $('#exampleList li .sentence span[data-tooltip]').each((_, e) => {
-    $(e).balloon({
-      classname: 'time-balloon',
-      contents: $(e).data('tooltip'),
-      showDuration: 64,
-      minLifetime: 0,
-      tipSize: 4,
-      showAnimation(d, c) { this.fadeIn(d, c); },
-      css: {
-        backgroundColor: '#f7f7f7',
-        color: '#636363',
-        boxShadow: '0',
-        opacity: 1,
-      },
-    });
-  });
-};
-
-const expandResult = () => {
+const expandResult = (extensionRootPath) => {
   // 新しいウィンドウに #app をコピーして CSS 読み込み
   // 'about:blank' を指定しないとリサイズができない https://stackoverflow.com/questions/35341839/chrome-zoom-is-not-working-in-child-tab
   const newDoc = window.open('about:blank').document;
@@ -75,9 +10,7 @@ const expandResult = () => {
   Array.from($('head>link[rel="stylesheet"]'), style => newDoc.write(style.outerHTML));
   // TODO: src/ の中から読む
   newDoc.write('<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>');
-  const balloonJsSrc = Array.from(document.scripts, s => s.src).filter(s => s.includes('jquery.balloon'))[0];
-  newDoc.write(`<script type="text/javascript" src="${balloonJsSrc}"></script>`);
-  newDoc.write($('<script>').text(`( ${initializeExpandedResult.toString()} )()`).get(0).outerHTML);
+  newDoc.write(`<script type="text/javascript" src="${extensionRootPath}expanded.bundle.js"></script>`);
 };
 
 const ADD_ROWS = 1;
@@ -260,6 +193,7 @@ jQuery(($) => {
   let shouldShowLatencyBalloon;
   let latencyTarget1;
   let latencyTarget2;
+  let extensionRootPath;
   let waitingAcceptedFirstKey = false;
   let showWordTime;
 
@@ -281,6 +215,7 @@ jQuery(($) => {
     shouldShowLatencyBalloon = !!configDiv.dataset.showLatencyBalloon;
     latencyTarget1 = parseFloat(configDiv.dataset.latencyTarget1) * 1000;
     latencyTarget2 = parseFloat(configDiv.dataset.latencyTarget2) * 1000;
+    extensionRootPath = configDiv.dataset.extensionRootPath;
   };
   const showLatencyBalloon = (latency, target1, target2) => {
     const color = latency < target1 ? '#dff0d8' : latency < target2 ? '#fcf8e3' : '#f2dede';
@@ -350,7 +285,7 @@ jQuery(($) => {
     resultShortCutKeys: {
       // F (Full result)
       70: () => {
-        expandResult();
+        expandResult(extensionRootPath);
       },
     },
   });

@@ -23,7 +23,8 @@
     "default_popup": "popup.html"
   },
   "web_accessible_resources": [
-    "app.bundle.js"
+    "app.bundle.js",
+    "expanded.bundle.js"
   ],
   "icons": {
     "128": "e128.png"

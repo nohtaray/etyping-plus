@@ -24,9 +24,10 @@ const options = {
     background: path.join(__dirname, 'src', 'js', 'background.js'),
     content: path.join(__dirname, 'src', 'js', 'content.js'),
     app: path.join(__dirname, 'src', 'js', 'app/main.js'),
+    expanded: path.join(__dirname, 'src', 'js', 'app/mainExpanded.js'),
   },
   chromeExtensionBoilerplate: {
-    notHotReload: ['content', 'app'],
+    notHotReload: ['content', 'app', 'expanded'],
   },
   output: {
     path: path.join(__dirname, 'build'),

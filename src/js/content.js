@@ -20,6 +20,7 @@ const updateConfigDiv = (configDiv, config) => {
   configDiv.dataset.showLatencyBalloon = config['config.showLatencyBalloon'] || '';
   configDiv.dataset.latencyTarget1 = config['config.latencyTarget1'] || 0;
   configDiv.dataset.latencyTarget2 = config['config.latencyTarget2'] || 0;
+  configDiv.dataset.extensionRootPath = chrome.runtime.getURL('/');
 };
 
 // タイピング画面出てたら script を注入する
