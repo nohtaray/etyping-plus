@@ -1,6 +1,7 @@
 import './jquery.balloon.min';
 import '../../fontawesome';
 import Calculator from './calculator';
+import {removeAllTimeTooltips, setTimeTooltip} from './timeTooltip';
 
 const expandResult = (extensionRootPath) => {
   // 新しいウィンドウに #app をコピーして CSS 読み込み
@@ -38,21 +39,7 @@ const showWordDetail = (charTimes, $sentence, missTimes, time, latency, miss) =>
     const toolTip = loss >= 0
         ? `${(charTimes[j] / 1000).toFixed(3)} (${(loss / 1000).toFixed(3)})`
         : `${(charTimes[j] / 1000).toFixed(3)}`;
-    // FIXME: 共通化。全画面の方コピペで定義してるので変えるときは一緒に変えてください
-    return $key.attr('data-tooltip', toolTip).balloon({
-      classname: 'time-balloon',
-      contents: toolTip,
-      showDuration: 64,
-      minLifetime: 0,
-      tipSize: 4,
-      showAnimation(d, c) { this.fadeIn(d, c); },
-      css: {
-        backgroundColor: '#f7f7f7',
-        color: '#636363',
-        boxShadow: '0',
-        opacity: 1,
-      },
-    });
+    return setTimeTooltip($key, toolTip).attr('data-tooltip', toolTip);
   });
   $sentence.html($keys);
 
@@ -238,16 +225,13 @@ jQuery(($) => {
   const hideLatencyBalloon = () => {
     $('.balloon').remove();
   };
-  const removeTimeBalloons = () => {
-    $('.time-balloon').remove();
-  };
 
   setEventHandlers({
     $,
     onLoadStartView: () => {
       updateConfig();
       // リザルトで文字別タイムが表示されたまま R でリトライするとツールチップが残ったままになる
-      removeTimeBalloons();
+      removeAllTimeTooltips();
     },
     onStartCountdown: () => {
       updateConfig();

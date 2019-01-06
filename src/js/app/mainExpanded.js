@@ -1,4 +1,4 @@
-import './jquery.balloon.min';
+import {setTimeTooltip} from './timeTooltip';
 
 // 全画面リザルトページ
 {
@@ -46,21 +46,7 @@ import './jquery.balloon.min';
   $(window).on('resize', () => adjustHeight());
 
   // 文字別タイム表示
-  // FIXME: 共通化
   $('#exampleList li .sentence span[data-tooltip]').each((_, e) => {
-    $(e).balloon({
-      classname: 'time-balloon',
-      contents: $(e).data('tooltip'),
-      showDuration: 64,
-      minLifetime: 0,
-      tipSize: 4,
-      showAnimation(d, c) { this.fadeIn(d, c); },
-      css: {
-        backgroundColor: '#f7f7f7',
-        color: '#636363',
-        boxShadow: '0',
-        opacity: 1,
-      },
-    });
+    setTimeTooltip($(e), $(e).data('tooltip'));
   });
 }
