@@ -1,3 +1,5 @@
+import {ADD_HEIGHT} from './app/constants';
+
 const getConfig = callback => {
   // -> background.js
   chrome.runtime.sendMessage(['localStorage', 'getAllItems'], items => {
@@ -47,8 +49,6 @@ setInterval(() => {
   });
 
   // 見た目調整
-  const ADD_ROWS = 1;
-  const ADD_HEIGHT = 32 * ADD_ROWS;
   const addHeight = (element, height) => {
     element.style.height = parseInt(element.style.height, 10) + height + 'px';
   };

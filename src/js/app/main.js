@@ -2,6 +2,7 @@ import './jquery.balloon.min';
 import '../../fontawesome';
 import Calculator from './calculator';
 import {removeAllTimeTooltips, setTimeTooltip} from './timeTooltip';
+import {ADD_HEIGHT} from './constants';
 
 class OriginalResult {
   constructor({ score, level, time, charCount, missCount, wpm, accuracy }) {
@@ -43,11 +44,8 @@ class ResultPage {
 
 class MainPage {
   constructor() {
-    const ADD_ROWS = 1;
-    this.ADD_HEIGHT = 32 * ADD_ROWS;
-
     // 見た目調整
-    $('#app').css('height', `+=${this.ADD_HEIGHT}px`);
+    $('#app').css('height', `+=${ADD_HEIGHT}px`);
   }
 
   expandResult(extensionRootPath) {
@@ -117,11 +115,11 @@ class MainPage {
     $('#prev .result_data ul').append(`<li id="previous_rkpm"><div class="data">${previousResult == null ? '-' : previousResult.rkpm.toFixed(2)}</div></li>`);
 
     // 見た目調整
-    $('#result article').css('height', `+=${this.ADD_HEIGHT}px`);
-    $('#result #exampleList').css('height', `+=${this.ADD_HEIGHT}px`);
-    $('#result .result_data').css('height', `+=${this.ADD_HEIGHT}px`);
-    $('#result #current').css('height', `+=${this.ADD_HEIGHT}px`);
-    $('#result #prev').css('height', `+=${this.ADD_HEIGHT}px`);
+    $('#result article').css('height', `+=${ADD_HEIGHT}px`);
+    $('#result #exampleList').css('height', `+=${ADD_HEIGHT}px`);
+    $('#result .result_data').css('height', `+=${ADD_HEIGHT}px`);
+    $('#result #current').css('height', `+=${ADD_HEIGHT}px`);
+    $('#result #prev').css('height', `+=${ADD_HEIGHT}px`);
     // マウスで選択できるようにする
     $('#result').css({ 'user-select': 'text' });
     // 全画面表示ボタン
