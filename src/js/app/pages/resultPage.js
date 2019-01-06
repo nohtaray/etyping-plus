@@ -44,7 +44,7 @@ export default class ResultPage {
     newDoc.write(`<script type="text/javascript" src="${this._extensionRootPath}expanded.bundle.js"></script>`);
   }
 
-  _showWordDetail(charTimes, $sentence, missTimes, time, latency, miss) {
+  _showWordDetail({ $sentence, charTimes, missTimes, time, miss, latency }) {
     if (charTimes == null || charTimes.length === 0) {
       $sentence.fadeTo(0, 0.6);
       return;
@@ -80,11 +80,22 @@ export default class ResultPage {
     }).text(`latency: ${(latency / 1000).toFixed(3)}, kpm: ${kpm.toFixed(0)}, rkpm: ${rkpm.toFixed(0)}, miss: ${miss.toFixed(0)}`));
   }
 
-  extend({ misses, times, latencies, charTimes, missTimes, rkpm, latency, previousResult }) {
+  /**
+   * @param {Result} result
+   * @param {Result} previousResult
+   */
+  extend({ result, previousResult }) {
     // ワード詳細
     const $sentences = $('#exampleList li .sentence').css('cursor', 'default');
     for (let i = 0; i < $sentences.size(); i++) {
-      this._showWordDetail(charTimes[i], $sentences.eq(i), missTimes[i], times[i], latencies[i], misses[i]);
+      this._showWordDetail({
+        $sentence: $sentences.eq(i),
+        charTimes: result.charTimes[i],
+        missTimes: result.missTimes[i],
+        time: result.times[i],
+        miss: result.misses[i],
+        latency: result.latencies[i],
+      });
     }
 
     // 苦手キー邪魔なので除去
@@ -92,11 +103,11 @@ export default class ResultPage {
     $('#prev .result_data ul li').last().remove();
 
     // 初速
-    $('#current .result_data ul').append(`<li id="latency"><div class="title">Latency</div><div class="data">${latency.toFixed(3)}</div></li>`);
+    $('#current .result_data ul').append(`<li id="latency"><div class="title">Latency</div><div class="data">${result.latency.toFixed(3)}</div></li>`);
     $('#prev .result_data ul').append(`<li id="previous_latency"><div class="data">${previousResult == null ? '-' : previousResult.latency.toFixed(3)}</div></li>`);
 
     // RKPM
-    $('#current .result_data ul').append(`<li id="rkpm"><div class="title">RKPM</div><div class="data">${rkpm.toFixed(2)}</div></li>`);
+    $('#current .result_data ul').append(`<li id="rkpm"><div class="title">RKPM</div><div class="data">${result.rkpm.toFixed(2)}</div></li>`);
     $('#prev .result_data ul').append(`<li id="previous_rkpm"><div class="data">${previousResult == null ? '-' : previousResult.rkpm.toFixed(2)}</div></li>`);
 
     // 見た目調整

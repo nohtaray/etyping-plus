@@ -154,13 +154,7 @@ jQuery(($) => {
       resultPage = new ResultPage(extensionRootPath);
       calc.handleShowResult(resultPage.originalResult());
       resultPage.extend({
-        misses: calc.result.misses,
-        times: calc.result.times,
-        latencies: calc.result.latencies,
-        charTimes: calc.result.charTimes,
-        missTimes: calc.result.missTimes,
-        latency: calc.result.latency,
-        rkpm: calc.result.rkpm,
+        result: calc.result,
         previousResult,
       });
       previousResult = calc.result;
