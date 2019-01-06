@@ -1,14 +1,4 @@
-class Result {
-  constructor({ misses, times, latencies, charTimes, missTimes, latency, rkpm }) {
-    this.misses = misses;
-    this.times = times;
-    this.latencies = latencies;
-    this.charTimes = charTimes;
-    this.missTimes = missTimes;
-    this.latency = latency;
-    this.rkpm = rkpm;
-  }
-}
+import {Result} from './models';
 
 export default class {
   constructor() {
