@@ -17,6 +17,10 @@ class OriginalResult {
 }
 
 class ResultPage {
+  constructor(extensionRootPath) {
+    this._extensionRootPath = extensionRootPath;
+  }
+
   _parseTime(timeStr) {
     if (timeStr.includes('分')) {
       const [m, s] = timeStr.split('分');
@@ -40,15 +44,8 @@ class ResultPage {
       accuracy: parseFloat(this._selectResult('正確率')) / 100,
     });
   }
-}
 
-class MainPage {
-  constructor() {
-    // 見た目調整
-    $('#app').css('height', `+=${ADD_HEIGHT}px`);
-  }
-
-  expandResult(extensionRootPath) {
+  expand() {
     // 新しいウィンドウに #app をコピーして CSS 読み込み
     // 'about:blank' を指定しないとリサイズができない https://stackoverflow.com/questions/35341839/chrome-zoom-is-not-working-in-child-tab
     const newDoc = window.open('about:blank').document;
@@ -56,10 +53,10 @@ class MainPage {
     Array.from($('head>link[rel="stylesheet"]'), style => newDoc.write(style.outerHTML));
     // TODO: src/ の中から読む
     newDoc.write('<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>');
-    newDoc.write(`<script type="text/javascript" src="${extensionRootPath}expanded.bundle.js"></script>`);
+    newDoc.write(`<script type="text/javascript" src="${this._extensionRootPath}expanded.bundle.js"></script>`);
   }
 
-  showWordDetail(charTimes, $sentence, missTimes, time, latency, miss) {
+  _showWordDetail(charTimes, $sentence, missTimes, time, latency, miss) {
     if (charTimes == null || charTimes.length === 0) {
       $sentence.fadeTo(0, 0.6);
       return;
@@ -95,11 +92,11 @@ class MainPage {
     }).text(`latency: ${(latency / 1000).toFixed(3)}, kpm: ${kpm.toFixed(0)}, rkpm: ${rkpm.toFixed(0)}, miss: ${miss.toFixed(0)}`));
   }
 
-  extendResult({ misses, times, latencies, charTimes, missTimes, rkpm, latency, previousResult }) {
+  extend({ misses, times, latencies, charTimes, missTimes, rkpm, latency, previousResult }) {
     // ワード詳細
     const $sentences = $('#exampleList li .sentence').css('cursor', 'default');
     for (let i = 0; i < $sentences.size(); i++) {
-      this.showWordDetail(charTimes[i], $sentences.eq(i), missTimes[i], times[i], latencies[i], misses[i]);
+      this._showWordDetail(charTimes[i], $sentences.eq(i), missTimes[i], times[i], latencies[i], misses[i]);
     }
 
     // 苦手キー邪魔なので除去
@@ -124,7 +121,7 @@ class MainPage {
     $('#result').css({ 'user-select': 'text' });
     // 全画面表示ボタン
     $('<i class="fas fa-external-link-alt">').addClass('expand_result').appendTo($('#current')).on('click', () => {
-      this.expandResult();
+      this.expand();
     }).css({
       position: 'absolute',
       padding: '8px',
@@ -136,6 +133,13 @@ class MainPage {
         function() { $(this).css('cursor', 'pointer'); },
         function() { $(this).css('cursor', 'default'); },
     );
+  }
+}
+
+class MainPage {
+  constructor() {
+    // 見た目調整
+    $('#app').css('height', `+=${ADD_HEIGHT}px`);
   }
 
   showLatencyBalloon(latency, target1, target2) {
@@ -248,7 +252,8 @@ jQuery(($) => {
   let showWordTime;
   let previousResult;
 
-  const page = new MainPage();
+  const mainPage = new MainPage();
+  let resultPage;
   let calc = new Calculator();
 
   {
@@ -291,7 +296,7 @@ jQuery(($) => {
       if (waitingAcceptedFirstKey) {
         calc.handleAcceptFirstKey(now);
         if (shouldShowLatencyBalloon) {
-          page.showLatencyBalloon(now - showWordTime, latencyTarget1, latencyTarget2);
+          mainPage.showLatencyBalloon(now - showWordTime, latencyTarget1, latencyTarget2);
         }
         waitingAcceptedFirstKey = false;
       }
@@ -302,15 +307,16 @@ jQuery(($) => {
     },
     onFinishWord: () => {
       calc.handleFinishWord(Date.now());
-      page.hideLatencyBalloon();
+      mainPage.hideLatencyBalloon();
     },
     onEscape: () => {
       calc.handleEscape(Date.now());
-      page.hideLatencyBalloon();
+      mainPage.hideLatencyBalloon();
     },
     onShowResult: () => {
-      calc.handleShowResult((new ResultPage()).originalResult());
-      page.extendResult({
+      resultPage = new ResultPage(extensionRootPath);
+      calc.handleShowResult(resultPage.originalResult());
+      resultPage.extend({
         misses: calc.result.misses,
         times: calc.result.times,
         latencies: calc.result.latencies,
@@ -325,7 +331,7 @@ jQuery(($) => {
     resultShortCutKeys: {
       // F (Full result)
       70: () => {
-        page.expandResult(extensionRootPath);
+        resultPage.expand();
       },
     },
   });
