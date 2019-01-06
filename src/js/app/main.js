@@ -213,7 +213,7 @@ jQuery(($) => {
   let showWordTime;
 
   const page = new MainPage();
-  const calc = Calculator({ $, extendResult: page.extendResult.bind(page) });
+  const calc = new Calculator({ $, extendResult: page.extendResult.bind(page) });
 
   {
     // 打鍵直後の初速表示が有効なときはランキング送信を失敗させる
