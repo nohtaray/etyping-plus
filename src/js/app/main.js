@@ -3,6 +3,44 @@ import '../../fontawesome';
 import Calculator from './calculator';
 import {removeAllTimeTooltips, setTimeTooltip} from './timeTooltip';
 
+class OriginalResult {
+  constructor({ score, level, time, charCount, missCount, wpm, accuracy }) {
+    this.score = score;
+    this.level = level;
+    this.time = time;
+    this.charCount = charCount;
+    this.missCount = missCount;
+    this.wpm = wpm;
+    this.accuracy = accuracy;
+  }
+}
+
+class ResultPage {
+  _parseTime(timeStr) {
+    if (timeStr.includes('分')) {
+      const [m, s] = timeStr.split('分');
+      return m * 60000 + s.replace('秒', '.') * 1000;
+    }
+    return timeStr.replace('秒', '.') * 1000;
+  }
+
+  _selectResult(title) {
+    return $(`#current .result_data ul .title:contains("${title}")`).next().text();
+  }
+
+  originalResult() {
+    return new OriginalResult({
+      score: this._selectResult('スコア'),
+      level: this._selectResult('レベル'),
+      time: this._parseTime(this._selectResult('入力時間')),
+      charCount: parseInt(this._selectResult('入力文字数'), 10),
+      missCount: parseInt(this._selectResult('ミス入力数'), 10),
+      wpm: parseFloat(this._selectResult('WPM')),
+      accuracy: parseFloat(this._selectResult('正確率')) / 100,
+    });
+  }
+}
+
 class MainPage {
   constructor() {
     const ADD_ROWS = 1;
@@ -213,7 +251,7 @@ jQuery(($) => {
   let previousResult;
 
   const page = new MainPage();
-  let calc = new Calculator({ $, extendResult: page.extendResult.bind(page) });
+  let calc = new Calculator();
 
   {
     // 打鍵直後の初速表示が有効なときはランキング送信を失敗させる
@@ -240,7 +278,7 @@ jQuery(($) => {
       updateConfig();
       // リザルトで文字別タイムが表示されたまま R でリトライするとツールチップが残ったままになる
       removeAllTimeTooltips();
-      calc = new Calculator({ $, extendResult: page.extendResult.bind(page) });
+      calc = new Calculator();
     },
     onStartCountdown: () => {
       updateConfig();
@@ -273,7 +311,7 @@ jQuery(($) => {
       page.hideLatencyBalloon();
     },
     onShowResult: () => {
-      calc.handleShowResult();
+      calc.handleShowResult((new ResultPage()).originalResult());
       page.extendResult({
         misses: calc.result.misses,
         times: calc.result.times,
