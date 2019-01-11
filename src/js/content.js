@@ -1,3 +1,5 @@
+import {ADD_HEIGHT} from './app/constants';
+
 const getConfig = callback => {
   // -> background.js
   chrome.runtime.sendMessage(['localStorage', 'getAllItems'], items => {
@@ -20,6 +22,7 @@ const updateConfigDiv = (configDiv, config) => {
   configDiv.dataset.showLatencyBalloon = config['config.showLatencyBalloon'] || '';
   configDiv.dataset.latencyTarget1 = config['config.latencyTarget1'] || 0;
   configDiv.dataset.latencyTarget2 = config['config.latencyTarget2'] || 0;
+  configDiv.dataset.extensionRootPath = chrome.runtime.getURL('/');
 };
 
 // タイピング画面出てたら script を注入する
@@ -28,20 +31,13 @@ setInterval(() => {
   if (!appIframe) return;
   if (appIframe.contentDocument.getElementsByClassName(chrome.runtime.id).length > 0) return;
 
-  ['src/app.js', 'src/jquery.balloon.min.js'].forEach(fileName => {
+  ['app.bundle.js'].forEach(fileName => {
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.className = chrome.runtime.id;
     script.src = chrome.runtime.getURL(fileName);
     script.async = true;
     appIframe.contentDocument.body.appendChild(script);
-  });
-
-  ['fontawesome/css/fontawesome.min.css', 'fontawesome/css/solid.min.css'].forEach(fileName => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = chrome.runtime.getURL(fileName);
-    appIframe.contentDocument.body.appendChild(link);
   });
 
   const configDiv = document.createElement('div');
@@ -53,8 +49,6 @@ setInterval(() => {
   });
 
   // 見た目調整
-  const ADD_ROWS = 1;
-  const ADD_HEIGHT = 32 * ADD_ROWS;
   const addHeight = (element, height) => {
     element.style.height = parseInt(element.style.height, 10) + height + 'px';
   };
