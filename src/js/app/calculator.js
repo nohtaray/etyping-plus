@@ -1,4 +1,4 @@
-import {Result} from './models';
+import {CalculatedResult} from './models';
 
 export default class {
   constructor() {
@@ -76,7 +76,7 @@ export default class {
     const latency = latenciesSum / this.latencies.length / 1000;
     const rkpm = (originalResult.charCount - this.latencies.length) / (originalResult.time - latenciesSum) * 60000;
 
-    this.result = new Result({
+    this.result = new CalculatedResult({
       misses: this.misses,
       times: this.times,
       latencies: this.latencies,

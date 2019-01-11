@@ -10,7 +10,7 @@ export class OriginalResult {
   }
 }
 
-export class Result {
+export class CalculatedResult {
   constructor({ misses, times, latencies, charTimes, missTimes, latency, rkpm }) {
     this.misses = misses;
     this.times = times;

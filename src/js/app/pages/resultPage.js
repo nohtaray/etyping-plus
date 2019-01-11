@@ -80,8 +80,8 @@ export default class ResultPage {
   }
 
   /**
-   * @param {Result} result
-   * @param {Result} previousResult
+   * @param {CalculatedResult} result
+   * @param {CalculatedResult} previousResult
    */
   extend({ result, previousResult }) {
     // ワード詳細
