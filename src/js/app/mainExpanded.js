@@ -18,6 +18,15 @@ import {setTimeTooltip} from './timeTooltip';
     }
   }
 
+  // etyping-plus 表示
+  $('<div>').text('e-typing plus').css({
+    position: 'absolute',
+    bottom: '0px',
+    right: '10px',
+    fontSize: '10px',
+    fontStyle: 'italic',
+  }).appendTo($('.exampleList').last());
+
   // 列の中身が全部表示されるようにしつつ高さを揃える
   const adjustHeight = () => {
     $('.exampleList').css('height', 'auto');
