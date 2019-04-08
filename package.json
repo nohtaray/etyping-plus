@@ -1,11 +1,11 @@
 {
   "name": "etyping-plus",
-  "version": "1.5.3",
+  "version": "1.7.0",
   "description": "e-typing のリザルト画面を拡張します。",
   "scripts": {
     "build": "node utils/build.js",
     "start": "node utils/webserver.js",
-    "archive": "NODE_ENV=production node utils/build.js && zip -r archive.zip build/"
+    "archive": "NODE_ENV=production node utils/build.js && zip -rj archive.zip build/"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^1.0.0",
