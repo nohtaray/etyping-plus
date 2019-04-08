@@ -1,6 +1,6 @@
 {
   "name": "etyping-plus",
-  "version": "1.5.3",
+  "version": "1.7.0",
   "description": "e-typing のリザルト画面を拡張します。",
   "scripts": {
     "build": "node utils/build.js",
