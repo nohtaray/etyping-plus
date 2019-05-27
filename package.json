@@ -8,7 +8,7 @@
     "archive": "NODE_ENV=production node utils/build.js && zip -rj archive.zip build/"
   },
   "devDependencies": {
-    "clean-webpack-plugin": "^1.0.0",
+    "clean-webpack-plugin": "^2.0.2",
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "2.1.0",
     "file-loader": "3.0.1",
