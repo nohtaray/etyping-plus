@@ -18,7 +18,7 @@
     "style-loader": "^0.23.1",
     "url-loader": "^1.1.2",
     "webpack": "4.28.3",
-    "webpack-dev-server": "3.1.14",
+    "webpack-dev-server": "3.4.1",
     "write-file-webpack-plugin": "4.5.0"
   },
   "dependencies": {
