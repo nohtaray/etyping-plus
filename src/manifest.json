@@ -1,9 +1,9 @@
 {
   "name": "e-typing plus",
-  "version": "1.7.0",
-  "description": "e-typing のリザルト画面を拡張します。",
+  "version": "1.7.1",
+  "description": "e-typing の非公式 Chrome 拡張です。",
   "manifest_version": 2,
-  "author": "やだ",
+  "author": "yada",
   "background": {
     "scripts": [
       "background.bundle.js"

@@ -1,7 +1,7 @@
 {
   "name": "etyping-plus",
-  "version": "1.7.0",
-  "description": "e-typing のリザルト画面を拡張します。",
+  "version": "1.7.1",
+  "description": "e-typing の非公式 Chrome 拡張です。",
   "scripts": {
     "build": "node utils/build.js",
     "start": "node utils/webserver.js",
