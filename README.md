@@ -1,9 +1,4 @@
 # e-typing plus
 
-e-typing の Chrome 拡張です。
+e-typing の非公式 Chrome 拡張です。リザルト画面をタイパー・タイピスト向けに拡張します。
 
-
-## License
-
-- [Chrome Extension Webpack Boilerplate](https://github.com/samuelsimoes/chrome-extension-webpack-boilerplate)
-  * Copyright (c) 2016 Samuel Simões [MIT License](https://github.com/samuelsimoes/chrome-extension-webpack-boilerplate/blob/master/LICENSE.md)
