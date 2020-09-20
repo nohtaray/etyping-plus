@@ -50,6 +50,8 @@ import {setTimeTooltip} from './timeTooltip';
     $('.exampleList').eq(1).css('left', '387px');
     $('#current').css('width', '964px');
     $('#result>article').css('width', '1104px');
+    // 画面を縮小すると border が太くなってレイアウトが崩れるのでもとの css を書き換える
+    $('#prev').css({ position: 'absolute', right: 0, zIndex: -1 });
   }
   adjustHeight();
   $(window).on('resize', () => adjustHeight());
